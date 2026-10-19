@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalÆ · Seguimiento Longitudinal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --verde:#2D5F4F; --verde-osc:#1F4438; --verde-med:#3F7A66; --verde-suave:#E3EDE7; --verde-linea:#CBDCD3;
+  --crema:#F0F4EE; --blanco:#FDFEFC;
+  --granate:#8B3A3A; --granate-suave:#F3E4E4;
+  --gold:#C4A878; --gold-osc:#A88B58; --gold-suave:#F4EDDF;
+  --ambar:#B07C2E; --ambar-suave:#F5EBD8;
+  --morado:#5B4B7A; --morado-suave:#EAE4F0;
+  --ink:#1E2B26; --ink-2:#48584F; --ink-3:#77857D;
+  --r:14px; --sombra:0 2px 10px rgba(31,68,56,.07); --sombra-alta:0 14px 34px rgba(31,68,56,.14);
+  --serif:'DM Serif Display',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif; --util:'Manrope',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--crema);color:var(--ink);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+::selection{background:var(--gold-suave)}
+
+/* ---------- Animaciones ---------- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@keyframes drawIn{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.reveal{opacity:0}
+.js-loaded .reveal.in{animation:fadeUp .5s cubic-bezier(.2,.7,.3,1) forwards}
+.js-loaded .vista-fade{animation:fadeUp .34s cubic-bezier(.2,.7,.3,1) both}
+
+.app{display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(180deg,var(--verde-osc),#17352b);color:#EAF2EE;padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:5px}
+.marca{font-family:var(--serif);font-size:28px;letter-spacing:.03em;color:#fff;padding:0 10px 4px}
+.marca em{color:var(--gold);font-style:italic}
+.marca-sub{font-family:var(--util);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9DBBAD;padding:0 10px 18px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:12px}
+.nav-btn{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;color:#C4D8CD;font-family:var(--util);font-weight:600;font-size:13.5px;padding:10px 12px;border-radius:10px;text-align:left;transition:background .18s,color .18s,transform .18s;position:relative}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;transform:translateX(2px)}
+.nav-btn.activo{background:var(--verde);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.nav-btn.activo::before{content:"";position:absolute;left:-18px;top:18%;height:64%;width:4px;border-radius:0 4px 4px 0;background:var(--gold)}
+.nav-btn .ic{width:19px;height:19px;flex:none;opacity:.9}
+.nav-pie{margin-top:auto;font-size:11px;color:#8FAE9F;padding:14px 10px 0;border-top:1px solid rgba(255,255,255,.12);line-height:1.5}
+.nav-pie strong{color:#C9D9CF;font-weight:600}
+.conn{display:inline-flex;align-items:center;gap:7px;font-family:var(--util);font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:99px;margin-top:10px}
+.conn.on{background:rgba(62,142,109,.28);color:#D6F0E2}
+.conn.off{background:rgba(196,168,120,.2);color:#F2E6CF}
+.conn .dot{width:7px;height:7px;border-radius:50%}
+.conn.on .dot{background:#6FE0AE;box-shadow:0 0 0 0 rgba(111,224,174,.6);animation:pulse 2.4s infinite}
+.conn.off .dot{background:var(--gold)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(111,224,174,.5)}70%{box-shadow:0 0 0 7px rgba(111,224,174,0)}100%{box-shadow:0 0 0 0 rgba(111,224,174,0)}}
+
+.main{padding:30px 40px 70px;max-width:1200px;width:100%;margin:0 auto}
+.tope{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.tope h1{font-family:var(--serif);font-weight:400;font-size:32px;color:var(--verde-osc);line-height:1.12}
+.tope h1 em{color:var(--gold-osc);font-style:italic}
+.eyebrow{font-family:var(--util);font-size:10.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verde-med);margin-bottom:6px}
+.tope-der{font-family:var(--util);font-size:12.5px;color:var(--ink-3);text-align:right}
+
+.tarjeta{background:var(--blanco);border:1px solid var(--verde-linea);border-radius:var(--r);box-shadow:var(--sombra);padding:20px 22px;transition:transform .2s,box-shadow .2s}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.kpi{padding:20px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,var(--verde-suave),transparent 70%);opacity:.7}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--sombra-alta)}
+.kpi .num{font-family:var(--serif);font-size:38px;color:var(--verde-osc);line-height:1}
+.kpi .num.alerta{color:var(--granate)}
+.kpi .lbl{font-family:var(--util);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-top:8px}
+.kpi .det{font-size:12.5px;color:var(--ink-2);margin-top:5px}
+h2.sec{font-family:var(--serif);font-weight:400;font-size:21px;color:var(--verde-osc);margin:30px 0 12px}
+h2.sec em{color:var(--gold-osc)}
+h3.sub{font-family:var(--util);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--verde-med);margin:0 0 10px}
+.ayuda{font-size:12.5px;color:var(--ink-3);background:var(--verde-suave);border-left:3px solid var(--verde-med);padding:9px 13px;border-radius:0 9px 9px 0;margin:10px 0 14px;line-height:1.5}
+.ayuda.gold{background:var(--gold-suave);border-left-color:var(--gold)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--util);font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 11px;border-radius:99px;text-transform:uppercase}
+.chip.verde{background:var(--verde-suave);color:var(--verde-osc)}
+.chip.ambar{background:var(--ambar-suave);color:var(--ambar)}
+.chip.rojo{background:var(--granate-suave);color:var(--granate)}
+.chip.gold{background:var(--gold-suave);color:var(--gold-osc)}
+.chip.gris{background:#E9ECE8;color:var(--ink-2)}
+.chip.cannabis{background:var(--morado-suave);color:var(--morado)}
+.punto{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.punto.verde{background:#3E8E6D}.punto.ambar{background:var(--ambar)}.punto.rojo{background:var(--granate)}.punto.gris{background:#B9C2BC}
+
+.tabla{width:100%;border-collapse:collapse;font-size:14px}
+.tabla th{font-family:var(--util);font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--verde-linea)}
+.tabla td{padding:11px 10px;border-bottom:1px solid #E6ECE7;vertical-align:middle}
+.tabla tr.click{cursor:pointer;transition:background .14s}
+.tabla tr.click:hover{background:var(--verde-suave)}
+.tabla tr.click:hover td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+
+.barra{height:8px;background:#E4EAE4;border-radius:99px;overflow:hidden;min-width:70px}
+.barra>i{display:block;height:100%;border-radius:99px;background:var(--verde-med);transform-origin:left;transition:width .6s cubic-bezier(.2,.7,.3,1)}
+.js-loaded .barra>i{animation:grow .7s cubic-bezier(.2,.7,.3,1)}
+.barra>i.ambar{background:var(--ambar)}.barra>i.rojo{background:var(--granate)}.barra>i.gold{background:var(--gold)}
+
+.btn{font-family:var(--util);font-weight:700;font-size:13px;letter-spacing:.03em;border-radius:10px;padding:9px 16px;border:1.5px solid var(--verde);background:var(--verde);color:#fff;transition:filter .15s,transform .12s,box-shadow .15s}
+.btn:hover{filter:brightness(1.08);box-shadow:0 6px 16px rgba(45,95,79,.25)}
+.btn:active{transform:translateY(1px)}
+.btn.linea{background:transparent;color:var(--verde);border-color:var(--verde);box-shadow:none}
+.btn.linea:hover{background:var(--verde-suave);filter:none}
+.btn.mini{padding:6px 11px;font-size:12px;border-radius:8px}
+
+.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--verde-linea);margin:6px 0 20px;flex-wrap:wrap}
+.tab{font-family:var(--util);font-weight:700;font-size:12.5px;letter-spacing:.03em;color:var(--ink-3);background:none;border:none;padding:9px 13px;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:color .15s}
+.tab:hover{color:var(--verde)}
+.tab.activo{color:var(--verde-osc);border-bottom-color:var(--gold)}
+
+/* Huella */
+.huella-fila{display:grid;grid-template-columns:200px 1fr 150px;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid #E6ECE7}
+.huella-fila:last-child{border-bottom:none}
+.huella-nombre{font-family:var(--util);font-weight:700;font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.huella-nombre small{display:block;font-weight:500;font-size:11px;color:var(--ink-3)}
+.traza{display:flex;gap:4px;flex-wrap:wrap}
+.celda{width:20px;height:20px;border-radius:5px;position:relative;flex:none;transition:transform .12s}
+.celda:hover{transform:scale(1.16)}
+.celda[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:26px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-family:var(--util);font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:6px;white-space:nowrap;z-index:20}
+.c2{background:#3E8E6D}.c1{background:#A9CBB6}.c0{background:#E2E8E1}.cR{background:var(--granate)}.cN{background:transparent;border:1.5px dashed #CBD5CE}
+.huella-meta{font-family:var(--util);font-size:11.5px;color:var(--ink-2);text-align:right;line-height:1.45}
+.tend{font-weight:800}.tend.up{color:#2E7B58}.tend.down{color:var(--granate)}.tend.flat{color:var(--ink-3)}
+.leyenda{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--util);font-size:11.5px;color:var(--ink-2);margin-top:14px}
+.leyenda span{display:flex;align-items:center;gap:6px}.leyenda i{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+/* Radar */
+.radar-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center}
+.radar svg{overflow:visible}
+.radar .poly{fill:rgba(63,122,102,.18);stroke:var(--verde-med);stroke-width:2;stroke-linejoin:round}
+.js-loaded .radar .poly{animation:popIn .6s cubic-bezier(.2,.7,.3,1)}
+.radar .pt{fill:var(--gold-osc)}
+.radar .axis{stroke:#D5E0D9;stroke-width:1}
+.radar .ring{fill:none;stroke:#E4EAE4;stroke-width:1}
+.radar .lbl{font-family:var(--util);font-size:10px;font-weight:700;fill:var(--ink-3)}
+.radar-leyenda{font-family:var(--util);font-size:12px;color:var(--ink-2);max-width:220px}
+.radar-leyenda .ll{display:flex;align-items:center;gap:8px;padding:3px 0}
+
+/* Gauge */
+.gauge-wrap{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.gauge{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;flex:none}
+.js-loaded .gauge{animation:popIn .6s cubic-bezier(.2,.7,.3,1)}
+.gauge .interior{width:112px;height:112px;border-radius:50%;background:var(--blanco);display:grid;place-items:center;text-align:center}
+.gauge .valor{font-family:var(--serif);font-size:33px;color:var(--verde-osc);line-height:1}
+.gauge .de{font-family:var(--util);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.bz-item{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #E6ECE7;font-size:13.5px}
+.bz-item:last-child{border:none}.bz-item .estado{flex:none;margin-top:4px}
+.bz-item strong{font-weight:600}.bz-item small{display:block;color:var(--ink-3);font-size:12px}
+
+/* Timeline */
+.tl{position:relative;margin-left:8px;padding-left:26px}
+.tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--gold),var(--verde-linea))}
+.tl-item{position:relative;padding:0 0 4px 0}
+.tl-item::before{content:"";position:absolute;left:-25px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--blanco);border:3px solid var(--verde-med)}
+.tl-item.ingreso::before{border-color:var(--gold-osc);background:var(--gold-suave)}
+.tl-fecha{font-family:var(--util);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--verde-med)}
+
+/* Receta / cannabis */
+.receta{border:1px solid var(--verde-linea);border-left:4px solid var(--morado);border-radius:10px;padding:14px 16px;margin-bottom:12px;background:var(--blanco);transition:box-shadow .2s,transform .2s}
+.receta:hover{box-shadow:var(--sombra-alta);transform:translateY(-2px)}
+.receta h4{font-family:var(--util);font-size:13px;font-weight:800;color:var(--morado);margin-bottom:4px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.receta p{font-size:13px;color:var(--ink-2);margin:4px 0}
+.ratio-bar{display:flex;height:9px;border-radius:99px;overflow:hidden;margin:7px 0;max-width:220px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.ratio-bar .thc{background:var(--morado)}.ratio-bar .cbd{background:var(--verde-med)}
+.ratio-leg{font-family:var(--util);font-size:10.5px;color:var(--ink-3);display:flex;gap:12px}
+.ratio-leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:middle}
+
+textarea,select,input{font-family:var(--sans);font-size:14px;color:var(--ink);background:#fff;border:1.5px solid var(--verde-linea);border-radius:9px;padding:8px 11px;width:100%}
+textarea:focus,select:focus,input:focus{outline:2px solid var(--verde-med);outline-offset:1px}
+label.campo{font-family:var(--util);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:block;margin:12px 0 5px}
+
+.carta{background:linear-gradient(160deg,var(--blanco),#F7F9F4);border:1px solid var(--gold);border-radius:var(--r);padding:26px 30px;box-shadow:var(--sombra)}
+.carta h3{font-family:var(--serif);font-weight:400;font-size:22px;color:var(--verde-osc);margin-bottom:4px}
+.carta .firma{font-family:var(--serif);font-style:italic;color:var(--verde-med);margin-top:18px;font-size:16px}
+.carta p{margin:10px 0;font-size:14.5px}
+.bloque-nota{background:var(--gold-suave);border-radius:10px;padding:12px 15px;font-size:13.5px;margin:12px 0}
+.pie-etico{margin-top:36px;padding-top:16px;border-top:1px solid var(--verde-linea);font-family:var(--util);font-size:11.5px;color:var(--ink-3);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.lista-limpia{list-style:none}
+.lista-limpia li{padding:7px 0 7px 22px;position:relative;font-size:14px;border-bottom:1px solid #EDF1EC}
+.lista-limpia li:last-child{border:none}
+.lista-limpia li::before{content:"";position:absolute;left:4px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.dato-par{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:13.5px;border-bottom:1px dashed #E3E9E3}
+.dato-par:last-child{border:none}.dato-par b{font-weight:600;color:var(--ink-2);font-family:var(--util);font-size:12px}
+
+/* Login */
+.overlay{position:fixed;inset:0;background:linear-gradient(150deg,var(--verde-osc),#15302780);backdrop-filter:blur(3px);display:grid;place-items:center;z-index:100;padding:20px}
+.login-card{background:var(--blanco);border-radius:18px;padding:34px;max-width:400px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.35);animation:popIn .4s cubic-bezier(.2,.7,.3,1)}
+.login-card .marca{color:var(--verde-osc);text-align:center;padding:0 0 2px;font-size:36px}
+.login-card .marca em{color:var(--gold-osc)}
+.login-sub{text-align:center;font-family:var(--util);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:22px}
+.login-msg{font-size:12.5px;margin-top:10px;min-height:16px}
+.login-msg.err{color:var(--granate)}.login-msg.ok{color:var(--verde-med)}
+
+/* skeleton */
+.sk{border-radius:8px;background:linear-gradient(90deg,#EDF1EC 25%,#E3EDE7 50%,#EDF1EC 75%);background-size:800px 100%;animation:shimmer 1.3s infinite}
+
+.oculto{display:none!important}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:820px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px;padding:14px}
+  .marca{font-size:21px;padding:0 8px}.marca-sub,.nav-pie{display:none}
+  .nav-btn{width:auto;padding:8px 11px;font-size:12px}.nav-btn .ic{display:none}.nav-btn.activo::before{display:none}
+  .main{padding:20px 16px 50px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .huella-fila{grid-template-columns:1fr;gap:8px}.huella-meta{text-align:left}
+}
+@media print{.sidebar,.tabs,.btn{display:none!important}.app{grid-template-columns:1fr}body{background:#fff}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+  .reveal{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="login" class="overlay oculto">
+  <div class="login-card">
+    <div class="marca">Vital<em>æ</em></div>
+    <div class="login-sub">Seguimiento clínico · Acceso del equipo</div>
+    <form id="form-login">
+      <label class="campo">Correo</label>
+      <input name="email" type="email" autocomplete="username" required placeholder="tu correo del equipo">
+      <label class="campo">Contraseña</label>
+      <input name="pass" type="password" autocomplete="current-password" required>
+      <div style="margin-top:18px"><button class="btn" type="submit" style="width:100%">Ingresar</button></div>
+      <div id="login-msg" class="login-msg"></div>
+    </form>
+  </div>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="marca">Vital<em>æ</em></div>
+    <div class="marca-sub">Seguimiento MEV · Cannábica</div>
+    <button class="nav-btn activo" data-vista="dashboard"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panel clínico</button>
+    <button class="nav-btn" data-vista="pacientes"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M16 14.8c2.8.2 4.8 1.8 5.5 4.7"/></svg>Personas atendidas</button>
+    <button class="nav-btn" data-vista="ficha"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/></svg>Ficha individual</button>
+    <button class="nav-btn" data-vista="metodologia"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Método y datos</button>
+    <div id="conn" class="conn off"><span class="dot"></span><span id="conn-txt">Modo demo</span></div>
+    <div class="nav-pie"><strong>VitalÆ</strong> · Medicina del Estilo de Vida y Cannábica<br>Dra. Valeria Alarcón · Uso clínico interno<br><span id="pie-ver">Prototipo v3.1</span></div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<script>
+/* =====================================================================
+   VitalÆ · Seguimiento longitudinal v3.1
+   MEV (9 pilares + Huella + Zonas Azules) + Medicina Cannábica
+   Backend: Supabase (Auth + Postgres + RLS). Respaldo demo offline.
+===================================================================== */
+const CONFIG = { SUPABASE_URL: "", SUPABASE_ANON_KEY: "" };
+let db=null, SESION=null;
+const online = () => CONFIG.SUPABASE_URL.trim() && CONFIG.SUPABASE_ANON_KEY.trim();
+if (online() && window.supabase) db = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+
+const PILARES=[
+ {id:"alimentacion",nombre:"Alimentación",corto:"Aliment.",grupo:"base"},
+ {id:"actividad",nombre:"Actividad física",corto:"Act. física",grupo:"base"},
+ {id:"sueno",nombre:"Sueño",corto:"Sueño",grupo:"base"},
+ {id:"estres",nombre:"Manejo del estrés",corto:"Estrés",grupo:"base"},
+ {id:"social",nombre:"Relaciones y conectividad",corto:"Social",grupo:"base"},
+ {id:"sustancias",nombre:"Sustancias de riesgo",corto:"Sustancias",grupo:"base"},
+ {id:"sexual",nombre:"Vida sexual",corto:"Sexual",grupo:"vitalae"},
+ {id:"laboral",nombre:"Salud laboral",corto:"Laboral",grupo:"vitalae"},
+ {id:"espiritual",nombre:"Espiritualidad y sentido",corto:"Sentido",grupo:"vitalae"}];
+const PIL=Object.fromEntries(PILARES.map(p=>[p.id,p.nombre]));
+const ETAPA_LABEL={precontemplacion:"Precontemplación",contemplacion:"Contemplación",preparacion:"Preparación",accion:"Acción",mantenimiento:"Mantenimiento",recaida:"Recaída",no_evaluado:"No evaluado"};
+const ETAPA_PESO={precontemplacion:1,contemplacion:2,preparacion:3,accion:4,mantenimiento:5,recaida:2,no_evaluado:0};
+const ETAPAS=Object.keys(ETAPA_LABEL);
+const RIESGO_LABEL={bajo:"bajo",medio:"medio",alto:"alto",no_evaluado:"no eval."};
+const FORMULACION_LABEL={sumidades_floridas:"Sumidades floridas (flores)",solucion_vaporizacion:"Solución para vaporización",aceite_oral:"Aceite oral",trociscos:"Trociscos",capsulas:"Cápsulas",topico:"Tópico",otro:"Otro"};
+const TIPO_CONSULTA_LABEL={medicina_cannabica:"Medicina Cannábica",medicina_estilo_vida:"Medicina del Estilo de Vida",medicina_integrativa:"Medicina Integrativa",mixta:"Mixta"};
+const BZ_ITEMS=[
+ {id:"proposito",txt:"Puede nombrar un motivo claro para levantarse cada mañana (propósito)",pilar:"espiritual"},
+ {id:"mov_natural",txt:"Su día incluye movimiento natural frecuente (caminar, bici, escaleras, tareas)",pilar:"actividad"},
+ {id:"pausa",txt:"Practica a diario alguna pausa que baja el ritmo (respiración, meditación, siesta, rito)",pilar:"estres"},
+ {id:"regla80",txt:"Suele detenerse antes de sentirse completamente lleno/a al comer",pilar:"alimentacion"},
+ {id:"vegetal",txt:"Alimentación predominantemente vegetal (legumbres, verduras, frutas, granos)",pilar:"alimentacion"},
+ {id:"alcohol",txt:"Consumo de alcohol ausente o muy moderado, nunca en atracón",pilar:"sustancias"},
+ {id:"pertenencia",txt:"Participa en una comunidad que le da pertenencia (club, fe, grupo estable)",pilar:"social"},
+ {id:"familia",txt:"Mantiene cercanía activa con su familia o personas significativas",pilar:"social"},
+ {id:"circulo",txt:"Su círculo cercano practica y refuerza hábitos saludables",pilar:"social"},
+ {id:"descanso",txt:"Duerme lo suficiente y protege su descanso de forma habitual",pilar:"sueno"}];
+const HOY=new Date();
+const hoyISO=()=>HOY.toISOString().slice(0,10);
+const fmtFecha=f=>f?new Date(f+"T12:00:00").toLocaleDateString("es-CL",{day:"numeric",month:"short",year:"numeric"}):"—";
+let PACIENTES=[];
+
+function pilaresVacios(ov){const o={};PILARES.forEach(p=>{o[p.id]=Object.assign({base:null,riesgo:"no_evaluado",mot:null,auto:null,etapa:"no_evaluado",prioridad:9,barreras:[],obs:"",hist:[]},(ov&&ov[p.id])||{});});return o;}
+function datosDemo(){return [{
+  id:"demo1",codigo:"DEMO-01",nombre:"Paciente de ejemplo",rut:"—",fecha_nacimiento:"1985-05-12",sexo_biologico:"femenino",
+  tipo_consulta:"medicina_cannabica",fecha_ingreso:"2026-04-01",proximo_control:"2026-11-20",ultimo_registro:"2026-10-12",
+  motivo_consulta:"Dolor crónico y ansiedad (caso sintético de demostración).",prioridades:"Dormir mejor y moverse más.",
+  narrativa_clinica:"Caso ficticio para explorar la interfaz sin datos reales.",notas_calidad_dato:"",estado:"activo",
+  diagnosticos:[{diagnostico:"Lumbalgia crónica",fecha:"2026-04-01",activo:true},{diagnostico:"Trastorno ansioso",fecha:"2026-04-01",activo:true}],
+  antecedentes:[{tipo:"habito",descripcion:"No tabaco; alcohol ocasional"}],medicamentos:[],
+  anamnesis:{anios_uso:"5 años",inicio_motivo:"terapéutico",cantidad:"1 g/día",usa_aceite:false,objetivo:"Dolor y sueño"},
+  recetas:[{fecha:"2026-04-01",tipo_formulacion:"sumidades_floridas",ratio_thc_cbd:"1:1",thc_mg_ml:null,cbd_mg_ml:null,dosis_diaria:"1 g",total_mensual:"30 g",duracion_meses:6,total_receta:"180 g",descripcion:"Flores vaporizadas 1:1 ante dolor.",estado:"vigente"}],
+  controles:[{fecha:"2026-04-01",tipo:"ingreso",canal:"virtual",subjetivo:"Dolor y ansiedad.",acuerdos:["Receta de flores 1:1","Actividad física progresiva"],facilitadores:["Motivación alta"],proximo_control:"2026-07-01"}],
+  pilares:pilaresVacios({actividad:{base:"Camina poco",riesgo:"medio",etapa:"preparacion",prioridad:1,mot:7,auto:5},sueno:{base:"Sueño fragmentado",riesgo:"alto",etapa:"accion",prioridad:2,mot:7,auto:6},estres:{base:"Ansiedad",riesgo:"alto",etapa:"accion",prioridad:3,mot:6,auto:5}}),
+  huella:{actividad:[1,1,2,1,2,2,1,2],sueno:[0,1,1,1,2,1,2,2],estres:[1,0,1,1,2,1,1,2]},
+  metas:[{pilar:"actividad",texto:"Caminar 30 min, 4 días/sem",estado:"en_curso",avance:65}],
+  microobjetivos:[{pilar:"actividad",texto:"Caminata diaria"}],bz:{pausa:1,mov_natural:1,descanso:1,familia:2}}];}
+
+function agrupar(filas,pid="paciente_id"){const m={};(filas||[]).forEach(f=>{(m[f[pid]]=m[f[pid]]||[]).push(f);});return m;}
+function construirDesdeSupabase(t){
+  const by={antecedentes:agrupar(t.antecedentes),diagnosticos:agrupar(t.diagnosticos),medicamentos:agrupar(t.medicamentos),
+    anamnesis:agrupar(t.anamnesis),recetas:agrupar(t.recetas),controles:agrupar(t.controles),pilares:agrupar(t.pilares),
+    metas:agrupar(t.metas),microobjetivos:agrupar(t.microobjetivos),bz:agrupar(t.bz),huella:agrupar(t.huella)};
+  return t.pacientes.map(p=>{
+    const pev=(by.pilares[p.id]||[]).slice().sort((a,b)=>(a.fecha>b.fecha?1:-1));
+    const pil=pilaresVacios(); const histM={};
+    pev.forEach(e=>{pil[e.pilar]={base:e.linea_base,riesgo:e.nivel_riesgo,mot:e.motivacion,auto:e.autoeficacia,etapa:e.etapa_cambio,prioridad:e.prioridad==null?9:e.prioridad,barreras:e.barreras||[],obs:e.observaciones||"",hist:histM[e.pilar]||[]};
+      if(e.motivacion!=null||e.autoeficacia!=null){(histM[e.pilar]=histM[e.pilar]||[]).push({m:e.motivacion,a:e.autoeficacia});pil[e.pilar].hist=histM[e.pilar];}});
+    const hu={}; (by.huella[p.id]||[]).sort((a,b)=>a.semana-b.semana||(a.creado_en>b.creado_en?1:-1)).forEach(h=>{hu[h.pilar]=hu[h.pilar]||[];while(hu[h.pilar].length<h.semana)hu[h.pilar].push(null);hu[h.pilar][h.semana-1]=h.valor;});
+    const bz={}; (by.bz[p.id]||[]).forEach(b=>{bz[b.item]=b.valor;});
+    return Object.assign({},p,{diagnosticos:by.diagnosticos[p.id]||[],antecedentes:by.antecedentes[p.id]||[],medicamentos:by.medicamentos[p.id]||[],
+      anamnesis:(by.anamnesis[p.id]||[])[0]||null,recetas:(by.recetas[p.id]||[]).sort((a,b)=>(a.fecha>b.fecha?1:-1)),
+      controles:(by.controles[p.id]||[]).sort((a,b)=>(a.fecha>b.fecha?1:-1)),pilares:pil,huella:hu,
+      metas:(by.metas[p.id]||[]).map(m=>({pilar:m.pilar,texto:m.texto,estado:m.estado,avance:m.avance})),
+      microobjetivos:(by.microobjetivos[p.id]||[]).map(m=>({pilar:m.pilar,texto:m.texto})),bz});
+  });
+}
+async function cargarDesdeSupabase(){
+  const sel=t=>db.from(t).select("*");
+  const [pac,ant,dx,med,anam,rec,ctr,pil,met,mic,bz,hue]=await Promise.all(
+    ["pacientes","antecedentes","diagnosticos","medicamentos","cannabis_anamnesis","recetas","controles","pilares_eval","metas","microobjetivos","blue_zones","huella"].map(sel));
+  const err=[pac,ant,dx,med,anam,rec,ctr,pil,met,mic,bz,hue].find(r=>r.error); if(err) throw err.error;
+  PACIENTES=construirDesdeSupabase({pacientes:pac.data,antecedentes:ant.data,diagnosticos:dx.data,medicamentos:med.data,anamnesis:anam.data,recetas:rec.data,controles:ctr.data,pilares:pil.data,metas:met.data,microobjetivos:mic.data,bz:bz.data,huella:hue.data});
+}
+
+/* ===== Lógica clínica (indicadores internos de seguimiento, no validados) ===== */
+const trazaValida=t=>(t||[]).filter(v=>v!==null&&v!==undefined);
+const consistencia=t=>{const v=trazaValida(t);return v.length?Math.round(100*v.filter(x=>x>=1).length/v.length):null;};
+const logroReciente=t=>{const v=trazaValida(t);if(!v.length)return null;const u=v.slice(-4);return Math.round(100*u.reduce((a,x)=>a+Math.max(0,x),0)/(u.length*2));};
+function tendencia(t){const v=trazaValida(t);if(v.length<4)return"flat";const m=Math.floor(v.length/2);const pr=a=>a.reduce((s,x)=>s+Math.max(0,x),0)/a.length;const d=pr(v.slice(m))-pr(v.slice(0,m));return d>0.25?"up":d<-0.25?"down":"flat";}
+const recaidasRecientes=t=>trazaValida((t||[]).slice(-4)).filter(x=>x===-1).length;
+function scorePilar(p,id){const d=p.pilares[id];const t=p.huella[id];const lr=logroReciente(t),co=consistencia(t);const mot=d.mot==null?0:d.mot,auto=d.auto==null?0:d.auto;if(lr===null)return Math.round((mot+auto)*5);return Math.round(lr*0.4+co*0.3+mot*1.5+auto*1.5);}
+const semaforo=s=>s>=70?"verde":s>=40?"ambar":"rojo";
+const semLabel=s=>s>=70?"Favorable":s>=40?"En construcción":"Requiere apoyo";
+function adherenciaGlobal(p){let sum=0,w=0;PILARES.forEach(pl=>{const d=p.pilares[pl.id];if(d.etapa==="no_evaluado"&&!(p.huella[pl.id]&&p.huella[pl.id].length))return;const peso=(d.prioridad||9)<=3?2:1;sum+=scorePilar(p,pl.id)*peso;w+=peso;});return w?Math.round(sum/w):0;}
+const hayAdh=p=>PILARES.some(pl=>(p.huella[pl.id]&&p.huella[pl.id].length)||p.pilares[pl.id].mot!=null||p.pilares[pl.id].auto!=null);
+const diasSinRegistro=p=>p.ultimo_registro?Math.round((HOY-new Date(p.ultimo_registro))/86400000):null;
+const progresoSostenido=t=>{const v=trazaValida(t);return v.length>=4&&v.slice(-4).every(x=>x>=1);};
+const ordenPil=p=>[...PILARES].sort((a,b)=>(p.pilares[a.id].prioridad||9)-(p.pilares[b.id].prioridad||9));
+const semanaActual=p=>p.fecha_ingreso?Math.max(1,Math.floor((HOY-new Date(p.fecha_ingreso))/604800000)+1):1;
+const microDe=(p,id)=>(p.microobjetivos||[]).filter(m=>m.pilar===id)[0]||(p.metas||[]).filter(m=>m.pilar===id&&m.estado!=="lograda")[0];
+const atrasoControl=p=>p.proximo_control?Math.round((HOY-new Date(p.proximo_control))/86400000):null; // días de atraso del control programado (+ = vencido)
+const enAbandono=p=>{const a=atrasoControl(p);return a!=null&&a>30;};
+function banderas(p){const f=[];const tieneTraza=PILARES.some(pl=>p.huella[pl.id]&&p.huella[pl.id].length);
+  const a=atrasoControl(p);
+  if(a!=null&&a>30)f.push({tipo:"rojo",txt:`Riesgo de abandono: control vencido hace ${a} días sin reagendar. Activar contacto proactivo (se apaga al registrar el seguimiento).`});
+  else if(a!=null&&a>0)f.push({tipo:"ambar",txt:`Control vencido (${fmtFecha(p.proximo_control)}) hace ${a} días: reagendar.`});
+  const d=diasSinRegistro(p);if(tieneTraza&&d!=null&&d>30)f.push({tipo:"ambar",txt:"Más de 30 días sin registro en la Huella."});
+  PILARES.forEach(pl=>{const t=p.huella[pl.id];if(!t||!t.length)return;if(recaidasRecientes(t)>=1&&!progresoSostenido(t))f.push({tipo:"ambar",txt:`Recaída reciente en ${PIL[pl.id].toLowerCase()}: prevención de recaídas.`});if(tendencia(t)==="down")f.push({tipo:"ambar",txt:`Tendencia descendente en ${PIL[pl.id].toLowerCase()}.`});if(progresoSostenido(t))f.push({tipo:"verde",txt:`Progreso sostenido en ${PIL[pl.id].toLowerCase()} (≥4 semanas).`});});
+  return f;}
+const bzScore=p=>BZ_ITEMS.reduce((s,it)=>s+(p.bz[it.id]||0),0);
+const bzEvaluados=p=>BZ_ITEMS.filter(it=>p.bz[it.id]!=null).length;
+function protectoresDe(p){const bz=BZ_ITEMS.filter(it=>p.bz[it.id]===2).map(it=>it.txt);const cons=PILARES.filter(pl=>{const d=p.pilares[pl.id];return d.etapa==="mantenimiento"&&d.riesgo==="bajo";}).map(pl=>`${PIL[pl.id]} consolidado`);const fac=[...new Set((p.controles||[]).flatMap(c=>c.facilitadores||[]))];return{bz,cons,fac};}
+function edad(p){if(!p.fecha_nacimiento)return"—";const n=new Date(p.fecha_nacimiento);let e=HOY.getFullYear()-n.getFullYear();if(HOY.getMonth()<n.getMonth()||(HOY.getMonth()===n.getMonth()&&HOY.getDate()<n.getDate()))e--;return e;}
+
+/* ===== Estado y navegación ===== */
+const state={vista:"dashboard",pacienteId:null,tab:"perfil",regPilar:null,regMsg:""};
+const UNDO=[];
+const $=s=>document.querySelector(s);
+const main=$("#main");
+const pac=()=>PACIENTES.find(x=>x.id===state.pacienteId)||PACIENTES[0];
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>{state.vista=b.dataset.vista;if(state.vista==="ficha"&&!state.pacienteId&&PACIENTES[0])state.pacienteId=PACIENTES[0].id;render();}));
+function irFicha(id,tab){state.vista="ficha";state.pacienteId=id;state.tab=tab||"perfil";render();}
+window.irFicha=irFicha;window.cambiarPaciente=id=>{state.pacienteId=id;render();};
+
+function render(){
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("activo",b.dataset.vista===state.vista));
+  const v={dashboard:vDashboard,pacientes:vPacientes,ficha:vFicha,metodologia:vMetodo,nuevo:vNuevo}[state.vista]||vDashboard;
+  main.innerHTML=`<div class="vista-fade">${v()}</div>`;
+  main.querySelectorAll("[data-ir]").forEach(el=>el.addEventListener("click",()=>irFicha(el.dataset.ir,el.dataset.tab)));
+  main.querySelectorAll("[data-tabgo]").forEach(el=>el.addEventListener("click",()=>{state.tab=el.dataset.tabgo;render();}));
+  const fr=$("#form-registro");if(fr)fr.addEventListener("submit",guardarRegistro);
+  const fn=$("#form-nuevo");if(fn)fn.addEventListener("submit",crearPersona);
+  animarContadores(); observarReveal();
+  window.scrollTo({top:0});
+}
+/* contadores animados */
+function animarContadores(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  main.querySelectorAll("[data-count]").forEach(el=>{
+    const fin=parseFloat(el.dataset.count); if(isNaN(fin)){return;} const dur=700,t0=performance.now();
+    const paso=now=>{const k=Math.min(1,(now-t0)/dur);el.textContent=Math.round(fin*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(paso);};
+    requestAnimationFrame(paso);});
+}
+/* revelado al hacer scroll (gated tras js-loaded) */
+let _io=null;
+function observarReveal(){
+  if(_io)_io.disconnect();
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){main.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));return;}
+  _io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");_io.unobserve(en.target);}}),{threshold:.12});
+  main.querySelectorAll(".reveal").forEach((e,i)=>{e.style.animationDelay=(Math.min(i,6)*45)+"ms";_io.observe(e);});
+}
+const pieEtico=`<div class="pie-etico"><span><strong>VitalÆ</strong> · Dra. Valeria Alarcón · Región de Coquimbo</span><span>Contenido clínico interno. Los puntajes son <em>indicadores internos de seguimiento</em>, no instrumentos validados.</span></div>`;
+
+/* ===== Gráfico radar SVG de los 9 pilares ===== */
+function radarSVG(p){
+  const R=92,cx=120,cy=115,N=PILARES.length;
+  const val=pl=>{const d=p.pilares[pl.id];const t=p.huella[pl.id];if(t&&t.length)return scorePilar(p,pl.id)/100;const base=ETAPA_PESO[d.etapa]/5;const ma=(d.mot!=null||d.auto!=null)?(((d.mot||0)+(d.auto||0))/20):null;return ma!=null?(base*0.5+ma*0.5):base;};
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/N;return [cx+Math.cos(a)*R*r,cy+Math.sin(a)*R*r];};
+  let rings=""; [0.25,0.5,0.75,1].forEach(r=>{let d="";for(let i=0;i<=N;i++){const[x,y]=pt(i%N,r);d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";}rings+=`<path class="ring" d="${d}Z"/>`;});
+  let axes="",labels="",poly="";
+  PILARES.forEach((pl,i)=>{const[ex,ey]=pt(i,1);axes+=`<line class="axis" x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"/>`;
+    const[lx,ly]=pt(i,1.17);labels+=`<text class="lbl" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${lx<cx-5?'end':lx>cx+5?'start':'middle'}" dominant-baseline="middle">${pl.corto}</text>`;});
+  let dd="",pts="";PILARES.forEach((pl,i)=>{const[x,y]=pt(i,Math.max(.04,val(pl)));dd+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";pts+=`<circle class="pt" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6"/>`;});
+  poly=`<path class="poly" d="${dd}Z"/>`+pts;
+  return `<div class="radar"><svg viewBox="0 0 240 240" width="240" height="240">${rings}${axes}${poly}${labels}</svg></div>`;
+}
+
+/* ===== Dashboard ===== */
+function vDashboard(){
+  const alertas=PACIENTES.flatMap(p=>banderas(p).filter(b=>b.tipo!=="verde").map(b=>({p,b})));
+  const enRiesgo=PACIENTES.filter(enAbandono).sort((a,b)=>atrasoControl(b)-atrasoControl(a));
+  const proximos=[...PACIENTES].filter(p=>p.proximo_control).sort((a,b)=>new Date(a.proximo_control)-new Date(b.proximo_control)).slice(0,6);
+  const conAdh=PACIENTES.filter(hayAdh);
+  const promAdh=conAdh.length?Math.round(conAdh.reduce((s,p)=>s+adherenciaGlobal(p),0)/conAdh.length):null;
+  const recetasVig=PACIENTES.reduce((s,p)=>s+(p.recetas||[]).filter(r=>r.estado==="vigente").length,0);
+  const ag=PILARES.map(pl=>{const sc=PACIENTES.filter(p=>p.huella[pl.id]&&p.huella[pl.id].length).map(p=>scorePilar(p,pl.id));return sc.length?{pl,s:Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),n:sc.length}:null;}).filter(Boolean).sort((a,b)=>b.s-a.s);
+  // distribución por tipo de dx dominante (mini-barras de carga clínica)
+  const dxCount={}; PACIENTES.forEach(p=>(p.diagnosticos||[]).forEach(d=>{const k=d.diagnostico.split(" ").slice(0,2).join(" ");dxCount[k]=(dxCount[k]||0)+1;}));
+  return `
+  <div class="tope">
+    <div><div class="eyebrow">Panel clínico</div><h1>Seguimiento <em>longitudinal</em></h1></div>
+    <div class="tope-der">${HOY.toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}<br>${online()?"Conectado a Supabase":"Modo demo (sin backend)"}</div>
+  </div>
+  <div class="grid g4">
+    <div class="tarjeta kpi reveal"><div class="num" data-count="${PACIENTES.length}">0</div><div class="lbl">Personas en seguimiento</div><div class="det">Programa VitalÆ</div></div>
+    <div class="tarjeta kpi reveal"><div class="num" ${promAdh==null?'':`data-count="${promAdh}"`}>${promAdh==null?'—':'0'}</div><div class="lbl">Adherencia global media</div><div class="det">Entre quienes tienen traza</div></div>
+    <div class="tarjeta kpi reveal"><div class="num ${alertas.length?'alerta':''}" data-count="${alertas.length}">0</div><div class="lbl">Alertas activas</div><div class="det">Recaída, tendencia, control vencido</div></div>
+    <div class="tarjeta kpi reveal"><div class="num" data-count="${recetasVig}">0</div><div class="lbl">Recetas vigentes</div><div class="det">Medicina cannábica</div></div>
+  </div>
+
+  <h2 class="sec">Alertas de <em>seguimiento</em></h2>
+  <div class="tarjeta reveal">
+    ${alertas.length?alertas.map(a=>`<div class="bz-item"><span class="punto ${a.b.tipo} estado"></span><div><strong>${esc(a.p.nombre)}</strong> <span class="chip gris">${a.p.codigo}</span> — ${esc(a.b.txt)}<small><button class="btn linea mini" data-ir="${a.p.id}" data-tab="huella" style="margin-top:6px">Ver ficha</button></small></div></div>`).join(""):`<p style="color:var(--ink-3)">Sin alertas activas. Las personas recién cargadas inician su traza en el próximo control.</p>`}
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Próximos controles</h3>
+      <table class="tabla"><thead><tr><th>Persona</th><th>Control</th><th>Estado</th></tr></thead><tbody>
+      ${proximos.length?proximos.map(p=>{const dd=Math.round((new Date(p.proximo_control)-HOY)/86400000);return `<tr class="click" data-ir="${p.id}"><td><strong>${esc(p.nombre)}</strong><br><small style="color:var(--ink-3)">${p.codigo}</small></td><td>${fmtFecha(p.proximo_control)}</td><td>${dd<0?'<span class="chip ambar">Vencido</span>':'<span class="chip verde">'+dd+' días</span>'}</td></tr>`}).join(""):'<tr><td colspan="3" style="color:var(--ink-3)">Sin controles agendados.</td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="tarjeta reveal">
+      <h3 class="sub">Carga clínica · diagnósticos frecuentes</h3>
+      <div class="ayuda">Agrupación simple por diagnóstico (conteo entre las ${PACIENTES.length} fichas).</div>
+      ${Object.entries(dxCount).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([k,n])=>`<div class="dato-par" style="align-items:center"><b style="text-transform:none">${esc(k)}</b><div style="display:flex;align-items:center;gap:10px;flex:1;max-width:160px;margin-left:auto"><div class="barra" style="flex:1"><i class="gold" style="width:${Math.round(n/PACIENTES.length*100)}%"></i></div><span style="font-family:var(--util);font-weight:800;font-size:12.5px;width:20px;text-align:right">${n}</span></div></div>`).join("")}
+    </div>
+  </div>
+
+  ${ag.length?`<h2 class="sec">Progreso agregado por <em>pilar</em></h2>
+  <div class="tarjeta reveal"><div class="ayuda">Promedio del score de pilar entre quienes tienen traza activa. Indicador interno.</div>
+  ${ag.map(a=>`<div class="dato-par" style="align-items:center"><b style="text-transform:none">${a.pl.nombre} <span style="font-weight:400;color:var(--ink-3)">(${a.n})</span></b><div style="display:flex;align-items:center;gap:10px;flex:1;max-width:240px;margin-left:auto"><div class="barra" style="flex:1"><i class="${semaforo(a.s)==='verde'?'':semaforo(a.s)}" style="width:${a.s}%"></i></div><span style="font-family:var(--util);font-weight:800;font-size:12.5px;width:26px;text-align:right">${a.s}</span></div></div>`).join("")}</div>`:""}
+
+  <h2 class="sec">Personas en riesgo de <em>abandono</em></h2>
+  <div class="tarjeta reveal">
+    ${enRiesgo.length?enRiesgo.map(p=>`<div class="bz-item"><span class="punto rojo estado"></span><div><strong>${esc(p.nombre)}</strong> <span class="chip gris">${p.codigo}</span> — control vencido hace ${atrasoControl(p)} días (${fmtFecha(p.proximo_control)}). Contacto proactivo sugerido; la alerta se apaga al registrar el seguimiento.<small><button class="btn mini" data-ir="${p.id}" data-tab="seguimiento" style="margin-top:6px">Abrir ficha</button></small></div></div>`).join(""):`<p style="color:var(--ink-3)">Ninguna persona tiene el control vencido por más de 30 días. 🎉</p>`}
+  </div>
+  ${pieEtico}`;
+}
+
+/* ===== Personas atendidas ===== */
+function vPacientes(){
+  return `
+  <div class="tope"><div><div class="eyebrow">Registro clínico</div><h1>Personas <em>atendidas</em></h1></div>
+  <div class="tope-der" style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><button class="btn" onclick="state.vista='nuevo';render()">+ Nueva persona</button><span>${PACIENTES.length} fichas${online()?"":" (demo)"}</span></div></div>
+  <div class="ayuda">Cada ficha integra estilo de vida (9 pilares, Huella, Zonas Azules) y Medicina Cannábica (diagnósticos, antecedentes, fármacos, anamnesis, recetas y controles). Seleccione una fila.</div>
+  <div class="tarjeta reveal">
+  <table class="tabla"><thead><tr><th>Persona</th><th>Tipo</th><th>Condición / diagnósticos</th><th>Ingreso</th><th>Adherencia</th><th>Estado</th></tr></thead><tbody>
+  ${PACIENTES.map(p=>{const s=adherenciaGlobal(p);const at=atrasoControl(p);const dx=(p.diagnosticos||[]).map(x=>x.diagnostico);return `
+    <tr class="click" data-ir="${p.id}">
+      <td><strong>${esc(p.nombre)}</strong><br><small style="color:var(--ink-3)">${p.codigo}${p.fecha_nacimiento?" · "+edad(p)+" a":""}${p.comuna?" · "+esc(p.comuna):""}</small></td>
+      <td><span class="chip cannabis">${(TIPO_CONSULTA_LABEL[p.tipo_consulta]||"").replace("Medicina ","")}</span></td>
+      <td style="max-width:250px">${dx.length?esc(dx[0]):"—"}${dx.length>1?`<br><small style="color:var(--ink-3)">+${dx.length-1} más</small>`:""}</td>
+      <td>${fmtFecha(p.fecha_ingreso)}</td>
+      <td>${hayAdh(p)?`<div style="display:flex;align-items:center;gap:9px"><div class="barra" style="width:60px"><i class="${semaforo(s)==='verde'?'':semaforo(s)}" style="width:${s}%"></i></div><b style="font-family:var(--util)">${s}</b></div>`:'<span style="color:var(--ink-3);font-size:12.5px">sin traza aún</span>'}</td>
+      <td>${at!=null&&at>30?'<span class="chip rojo">Riesgo abandono</span>':at!=null&&at>0?'<span class="chip ambar">Control vencido</span>':!hayAdh(p)?'<span class="chip gris">Ingreso cargado</span>':s>=70?'<span class="chip verde">Favorable</span>':'<span class="chip ambar">En curso</span>'}</td>
+    </tr>`}).join("")}
+  </tbody></table></div>
+  ${pieEtico}`;
+}
+
+/* ===== Ficha ===== */
+const TABS=[{id:"perfil",n:"Perfil"},{id:"evaluacion",n:"Evaluación y evolución"},{id:"cannabica",n:"Medicina Cannábica"},{id:"seguimiento",n:"Controles"},{id:"huella",n:"Huella Vitalæ"},{id:"bz",n:"Zonas Azules"},{id:"retro",n:"Retroalimentación"},{id:"reporte",n:"Reporte"}];
+function vFicha(){
+  if(!PACIENTES.length)return `<div class="tope"><h1>Sin pacientes</h1></div><div class="tarjeta">No hay fichas cargadas.</div>`;
+  const p=pac();const s=adherenciaGlobal(p);
+  const selector=`<select style="width:auto" onchange="cambiarPaciente(this.value)">${PACIENTES.map(x=>`<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.nombre)} (${x.codigo})</option>`).join("")}</select>`;
+  const cont={perfil:tPerfil,evaluacion:tEval,cannabica:tCannabica,seguimiento:tSeg,huella:tHuella,bz:tBZ,retro:tRetro,reporte:tReporte}[state.tab](p);
+  return `
+  <div class="tope">
+    <div><div class="eyebrow">Ficha individual</div><h1>${esc(p.nombre)}</h1>
+      <div style="font-family:var(--util);font-size:12.5px;color:var(--ink-3);margin-top:4px">${p.codigo} · ${edad(p)} años · ${esc(p.sexo_biologico||"")} · ${TIPO_CONSULTA_LABEL[p.tipo_consulta]||""} · Ingreso ${fmtFecha(p.fecha_ingreso)}</div></div>
+    <div class="tope-der" style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">${selector}${hayAdh(p)?`<span class="chip ${semaforo(s)}">Adherencia ${s} · ${semLabel(s)}</span>`:`<span class="chip gris">Sin traza conductual aún</span>`}</div>
+  </div>
+  ${p.notas_calidad_dato?`<div class="ayuda gold"><strong>Nota de calidad de dato:</strong> ${esc(p.notas_calidad_dato)}</div>`:""}
+  <div class="tabs">${TABS.map(t=>`<button class="tab ${state.tab===t.id?'activo':''}" data-tabgo="${t.id}">${t.n}</button>`).join("")}</div>
+  <div class="vista-fade">${cont}</div>
+  ${pieEtico}`;
+}
+function tPerfil(p){
+  const prot=protectoresDe(p);
+  const metasOrd=[...(p.metas||[])].sort((a,b)=>(p.pilares[a.pilar]?.prioridad||9)-(p.pilares[b.pilar]?.prioridad||9));
+  return `
+  <div class="grid g2">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Motivo de consulta</h3><p>${esc(p.motivo_consulta)||"—"}</p>
+      <h3 class="sub" style="margin-top:18px">Prioridades personales</h3><p>${esc(p.prioridades)||"—"}</p>
+      <h3 class="sub" style="margin-top:18px">Narrativa clínica</h3><p style="font-style:italic;color:var(--ink-2)">${esc(p.narrativa_clinica)||"—"}</p>
+    </div>
+    <div class="tarjeta reveal">
+      <h3 class="sub">Identificación</h3>
+      <div class="dato-par"><b>RUT</b><span>${esc(p.rut)||"—"}</span></div>
+      <div class="dato-par"><b>Nacimiento</b><span>${fmtFecha(p.fecha_nacimiento)}</span></div>
+      ${p.ocupacion?`<div class="dato-par"><b>Ocupación</b><span style="text-align:right;max-width:60%">${esc(p.ocupacion)}</span></div>`:""}
+      ${p.prevision?`<div class="dato-par"><b>Previsión</b><span>${esc(p.prevision)}</span></div>`:""}
+      ${p.direccion?`<div class="dato-par"><b>Dirección</b><span style="text-align:right;max-width:60%">${esc(p.direccion)}${p.comuna?", "+esc(p.comuna):""}</span></div>`:""}
+      ${p.email?`<div class="dato-par"><b>Correo</b><span>${esc(p.email)}</span></div>`:""}
+      ${p.telefono?`<div class="dato-par"><b>Teléfono</b><span>${esc(p.telefono)}</span></div>`:""}
+      <h3 class="sub" style="margin-top:18px;color:var(--gold-osc)">Factores protectores y facilitadores</h3>
+      <ul class="lista-limpia">
+        ${prot.bz.map(t=>`<li>${esc(t)}</li>`).join("")}${prot.cons.map(t=>`<li>${esc(t)}</li>`).join("")}${prot.fac.map(t=>`<li>Facilitador: ${esc(t.charAt(0).toLowerCase()+t.slice(1))}</li>`).join("")}
+        ${(!prot.bz.length&&!prot.cons.length&&!prot.fac.length)?'<li style="color:var(--ink-3)">Por pesquisar.</li>':""}
+      </ul>
+    </div>
+  </div>
+  <h2 class="sec">Etapa de cambio por <em>pilar</em></h2>
+  <div class="ayuda">Modelo transteórico (Prochaska y DiClemente), ordenado por la priorización de la persona. M = motivación, A = autoeficacia (1–10); «NC» = no conocida aún.</div>
+  <div class="tarjeta reveal"><div class="grid g3">
+    ${ordenPil(p).map(pl=>{const d=p.pilares[pl.id];return `<div style="padding:4px 0"><div style="font-family:var(--util);font-weight:700;font-size:13px">${d.prioridad||"–"}. ${pl.nombre}</div>
+      <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px"><span class="chip ${["accion","mantenimiento"].includes(d.etapa)?'verde':d.etapa==='recaida'?'rojo':d.etapa==='no_evaluado'?'gris':'gold'}">${ETAPA_LABEL[d.etapa]}</span>
+      <span class="chip ${d.mot==null?'gris':d.mot>=7?'verde':d.mot>=4?'gold':'rojo'}">M ${d.mot==null?"NC":d.mot}</span>
+      <span class="chip ${d.auto==null?'gris':d.auto>=7?'verde':d.auto>=4?'gold':'rojo'}">A ${d.auto==null?"NC":d.auto}</span></div></div>`}).join("")}
+  </div></div>
+  <h2 class="sec">Metas <em>acordadas</em></h2>
+  <div class="tarjeta reveal">
+    ${metasOrd.length?metasOrd.map(m=>`<div class="dato-par" style="align-items:center"><div><b style="text-transform:none">${PIL[m.pilar]||""}</b><br>${esc(m.texto)}</div><div style="display:flex;align-items:center;gap:10px;flex:none"><div class="barra" style="width:90px"><i class="${m.avance>=70?'':m.avance>=40?'gold':'ambar'}" style="width:${m.avance}%"></i></div><span class="chip ${m.estado==='lograda'?'verde':m.estado==='en_curso'?'gold':'gris'}">${(m.estado||"").replace("_"," ")}</span></div></div>`).join(""):'<p style="color:var(--ink-3)">Sin metas registradas.</p>'}
+  </div>`;
+}
+function evoViz(hist,campo,etq){const vals=(hist||[]).map(h=>h[campo]).filter(v=>v!=null);if(vals.length<2)return"";const d=vals[vals.length-1]-vals[0];const fl=d>0?'<span class="tend up">▲</span>':d<0?'<span class="tend down">▼</span>':'<span class="tend flat">◆</span>';const dots=vals.map(v=>`<span style="display:inline-block;width:7px;border-radius:3px;background:${v>=7?'#3E8E6D':v>=4?'var(--ambar)':'var(--granate)'};height:${5+v*1.6}px;margin-right:2px;vertical-align:bottom"></span>`).join("");return `<div class="dato-par" style="align-items:flex-end"><b>Evolución ${etq}</b><span style="display:flex;align-items:flex-end;gap:8px">${dots}<span style="font-family:var(--util);font-size:12px">${vals[0]} → ${vals[vals.length-1]} ${fl}</span></span></div>`;}
+function tEval(p){
+  const leyenda=ordenPil(p).slice(0,9).map(pl=>{const d=p.pilares[pl.id];const t=p.huella[pl.id];const sc=(t&&t.length)?scorePilar(p,pl.id):null;const col=d.riesgo==="alto"?"var(--granate)":d.riesgo==="medio"?"var(--ambar)":d.riesgo==="bajo"?"var(--verde-med)":"#B9C2BC";return `<div class="ll"><span class="punto" style="background:${col}"></span>${d.prioridad}. ${pl.corto}${sc!=null?` · <b style="font-family:var(--util)">${sc}</b>`:""}</div>`;}).join("");
+  return `
+  <div class="ayuda">Línea base por pilar (IBLM; 6 pilares SOCHIMEV + 3 ampliados VitalÆ), ordenada por prioridad. El radar resume el perfil: a mayor área, mayor desarrollo relativo (combina etapa de cambio, motivación/autoeficacia y, cuando existe, la Huella). Indicador interno.</div>
+  <div class="tarjeta reveal"><div class="radar-wrap">${radarSVG(p)}<div class="radar-leyenda">${leyenda}</div></div></div>
+  <div class="grid g2" style="margin-top:16px">
+  ${ordenPil(p).map(pl=>{const d=p.pilares[pl.id];const rc=d.riesgo==="alto"?"rojo":d.riesgo==="medio"?"ambar":d.riesgo==="bajo"?"verde":"gris";return `
+    <div class="tarjeta reveal">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="font-family:var(--util);font-weight:800;font-size:13.5px">${d.prioridad||"–"}. ${pl.nombre} ${pl.grupo==="vitalae"?'<span class="chip gold" style="margin-left:4px">VitalÆ</span>':''}</div></div><span class="chip ${rc}">Riesgo ${RIESGO_LABEL[d.riesgo]}</span></div>
+      <div class="dato-par" style="margin-top:8px"><b>Línea base</b><span style="text-align:right;max-width:62%">${esc(d.base)||'<span style="color:var(--ink-3)">No abordado</span>'}</span></div>
+      <div class="dato-par"><b>Motivación</b><span>${d.mot==null?"NC":d.mot+"/10"}</span></div>
+      <div class="dato-par"><b>Autoeficacia</b><span>${d.auto==null?"NC":d.auto+"/10"}</span></div>
+      ${evoViz(d.hist,"m","motivación")}${evoViz(d.hist,"a","autoeficacia")}
+      <div class="dato-par"><b>Etapa de cambio</b><span>${ETAPA_LABEL[d.etapa]}</span></div>
+      ${(d.barreras&&d.barreras.length)?`<div class="dato-par"><b>Barreras</b><span style="text-align:right;max-width:62%">${esc(d.barreras.join(" · "))}</span></div>`:""}
+      ${d.obs?`<div class="dato-par"><b>Observación</b><span style="text-align:right;max-width:62%;font-style:italic">${esc(d.obs)}</span></div>`:""}
+    </div>`}).join("")}
+  </div>`;
+}
+function ratioBar(r){
+  let thc=null,cbd=null;
+  if(r.thc_mg_ml!=null&&r.cbd_mg_ml!=null){thc=r.thc_mg_ml;cbd=r.cbd_mg_ml;}
+  else if(r.ratio_thc_cbd){const m=String(r.ratio_thc_cbd).match(/(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)/);if(m){thc=parseFloat(m[1]);cbd=parseFloat(m[2]);}}
+  if(thc==null||cbd==null||(thc+cbd)===0)return"";
+  const tot=thc+cbd,pt=Math.round(thc/tot*100);
+  return `<div class="ratio-bar"><span class="thc" style="width:${pt}%"></span><span class="cbd" style="width:${100-pt}%"></span></div><div class="ratio-leg"><span><i style="background:var(--morado)"></i>THC ${pt}%</span><span><i style="background:var(--verde-med)"></i>CBD ${100-pt}%</span></div>`;
+}
+function tCannabica(p){
+  const a=p.anamnesis;
+  return `
+  <div class="ayuda gold">Dimensión de Medicina Cannábica: diagnósticos, antecedentes, fármacos concomitantes, anamnesis de cannabis y recetas magistrales. Toda la información proviene de la ficha fuente sin omisiones.</div>
+  <div class="grid g2">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Diagnósticos</h3>
+      <ul class="lista-limpia">${(p.diagnosticos||[]).length?p.diagnosticos.map(d=>`<li>${esc(d.diagnostico)} ${d.origen?`<span class="chip gris" style="margin-left:4px">${esc(d.origen)}</span>`:""}</li>`).join(""):'<li style="color:var(--ink-3)">—</li>'}</ul>
+      <h3 class="sub" style="margin-top:18px">Antecedentes</h3>
+      <ul class="lista-limpia">${(p.antecedentes||[]).length?p.antecedentes.map(x=>`<li><span class="chip gris" style="margin-right:4px">${esc(x.tipo)}</span>${esc(x.descripcion)}${x.detalle?`<small style="color:var(--ink-3)">${esc(x.detalle)}</small>`:""}${x.vigente===false?' <small style="color:var(--ink-3)">(no vigente)</small>':""}</li>`).join(""):'<li style="color:var(--ink-3)">—</li>'}</ul>
+    </div>
+    <div class="tarjeta reveal">
+      <h3 class="sub">Fármacos concomitantes</h3>
+      ${(p.medicamentos||[]).length?p.medicamentos.map(m=>`<div class="dato-par"><div><b style="text-transform:none">${esc(m.nombre)}</b> ${esc(m.dosis||"")} ${esc(m.frecuencia||"")}<br><small style="color:var(--ink-3)">${esc(m.indicacion||"")}${m.notas?" · "+esc(m.notas):""}</small></div><span class="chip ${m.estado==='desprescripcion'?'ambar':m.estado==='suspendido'?'gris':'gold'}">${(m.estado||"").replace("_"," ")}</span></div>`).join(""):'<p style="color:var(--ink-3)">Sin fármacos no cannábicos registrados.</p>'}
+      <h3 class="sub" style="margin-top:18px">Anamnesis cannábica</h3>
+      ${a?`${a.anios_uso?`<div class="dato-par"><b>Tiempo de uso</b><span>${esc(a.anios_uso)}</span></div>`:""}${a.inicio_motivo?`<div class="dato-par"><b>Inicio</b><span>${esc(a.inicio_motivo)}</span></div>`:""}${a.uso_actual?`<div class="dato-par"><b>Uso actual</b><span style="text-align:right;max-width:62%">${esc(a.uso_actual)}</span></div>`:""}${a.frecuencia?`<div class="dato-par"><b>Frecuencia</b><span>${esc(a.frecuencia)}</span></div>`:""}${a.cantidad?`<div class="dato-par"><b>Cantidad</b><span>${esc(a.cantidad)}</span></div>`:""}${a.usa_aceite!=null?`<div class="dato-par"><b>Usa aceite</b><span>${a.usa_aceite?"Sí":"No"}</span></div>`:""}${a.objetivo_terapeutico?`<div class="dato-par"><b>Objetivo</b><span style="text-align:right;max-width:62%">${esc(a.objetivo_terapeutico)}</span></div>`:""}${a.notas?`<div class="dato-par"><b>Notas</b><span style="text-align:right;max-width:62%;font-style:italic">${esc(a.notas)}</span></div>`:""}`:'<p style="color:var(--ink-3)">No registrada.</p>'}
+    </div>
+  </div>
+  <h2 class="sec">Recetas <em>magistrales</em></h2>
+  <div class="reveal">
+    ${(p.recetas||[]).length?p.recetas.map(r=>`
+      <div class="receta">
+        <h4><span>${FORMULACION_LABEL[r.tipo_formulacion]||r.tipo_formulacion}</span><span><span class="chip ${r.estado==='vigente'?'verde':'gris'}">${r.estado||""}</span> ${r.fecha?`<span class="chip gris">${fmtFecha(r.fecha)}</span>`:""}</span></h4>
+        <p>${esc(r.descripcion)||""}</p>
+        ${ratioBar(r)}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          ${r.ratio_thc_cbd?`<span class="chip cannabis">THC:CBD ${esc(r.ratio_thc_cbd)}</span>`:""}
+          ${r.dosis_diaria?`<span class="chip gris">${esc(r.dosis_diaria)}/día</span>`:""}
+          ${r.total_mensual?`<span class="chip gris">${esc(r.total_mensual)}/mes</span>`:""}
+          ${r.duracion_meses?`<span class="chip gris">${r.duracion_meses} meses</span>`:""}
+          ${r.total_receta?`<span class="chip gold">Total: ${esc(r.total_receta)}</span>`:""}
+        </div>
+      </div>`).join(""):'<p style="color:var(--ink-3)">Sin recetas registradas.</p>'}
+  </div>`;
+}
+function tSeg(p){
+  const ctr=[...(p.controles||[])].sort((a,b)=>(a.fecha<b.fecha?1:-1));
+  return `
+  <div class="ayuda">Historia longitudinal de controles (del más reciente al ingreso). Cada hito documenta subjetivo, objetivo, evaluación, acuerdos y próxima acción.</div>
+  <div class="tarjeta reveal"><div class="tl">
+  ${ctr.length?ctr.map(c=>`
+    <div class="tl-item ${c.tipo==='ingreso'?'ingreso':''}" style="margin-bottom:18px">
+      <div class="tl-fecha">${(c.tipo||"control")} · ${fmtFecha(c.fecha)} <span class="chip gris" style="margin-left:4px">${c.canal||""}</span> ${(c.recaidas&&c.recaidas.length)?c.recaidas.map(r=>`<span class="chip rojo">Recaída: ${esc(r)}</span>`).join(""):""}</div>
+      ${c.subjetivo?`<p style="margin-top:8px;font-size:14px"><b style="font-family:var(--util);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">S</b> ${esc(c.subjetivo)}</p>`:""}
+      ${c.objetivo?`<p style="margin-top:6px;font-size:14px"><b style="font-family:var(--util);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">O</b> ${esc(c.objetivo)}</p>`:""}
+      ${c.evaluacion?`<p style="margin-top:6px;font-size:14px"><b style="font-family:var(--util);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">A</b> ${esc(c.evaluacion)}</p>`:""}
+      ${(c.acuerdos&&c.acuerdos.length)?`<div style="margin-top:8px"><b style="font-family:var(--util);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-osc)">Acuerdos</b><ul class="lista-limpia">${c.acuerdos.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+      ${c.proxima_accion?`<p style="margin-top:6px;font-size:13px;color:var(--ink-2)"><b style="font-family:var(--util);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-osc)">Próxima acción</b> ${esc(c.proxima_accion)}${c.proximo_control?` (${fmtFecha(c.proximo_control)})`:""}</p>`:""}
+    </div>`).join(""):'<p style="color:var(--ink-3)">Sin controles registrados.</p>'}
+  </div></div>`;
+}
+
+/* ===== Huella ===== */
+const ESTADO_TXT={2:"Logrado",1:"Parcial",0:"No logrado","-1":"Recaída"};
+function tHuella(p){
+  const conTraza=PILARES.filter(pl=>p.huella[pl.id]&&p.huella[pl.id].length);
+  const pilObjetivo=PILARES.filter(pl=>microDe(p,pl.id)||(p.huella[pl.id]&&p.huella[pl.id].length));
+  const semAct=semanaActual(p);
+  return `
+  <div class="tarjeta reveal" style="border:1.5px solid var(--gold);background:linear-gradient(150deg,var(--blanco),#F8F6EF)">
+    <div class="eyebrow" style="color:var(--gold-osc)">Módulo diferenciador</div>
+    <h2 class="sec" style="margin:2px 0 8px">Huella <em>Vitalæ</em></h2>
+    <p style="max-width:72ch">Traza semanal de microcambios por pilar. Cada celda es una semana: se registra si el microobjetivo se logró, se logró parcialmente, no se logró o hubo recaída. Es la fuente de los indicadores internos de adherencia.</p>
+    <div class="leyenda"><span><i class="c2"></i> Logrado</span><span><i class="c1"></i> Parcial</span><span><i class="c0"></i> No logrado</span><span><i class="cR"></i> Recaída</span><span><i class="cN" style="border:1.5px dashed #CBD5CE"></i> Sin registro</span></div>
+  </div>
+  <div class="tarjeta reveal" style="margin-top:16px">
+    ${conTraza.length?conTraza.map(pl=>{const t=p.huella[pl.id];const s=scorePilar(p,pl.id);const co=consistencia(t);const lr=logroReciente(t);const tn=tendencia(t);const rec=trazaValida(t).filter(x=>x===-1).length;const micro=microDe(p,pl.id);const tv=[...t];while(tv.length<semAct)tv.push(null);
+      return `<div class="huella-fila"><div class="huella-nombre"><span class="punto ${semaforo(s)}"></span><span>${pl.nombre}<small>${micro?"Microobjetivo: "+esc(micro.texto):""}</small></span></div><div class="traza">${tv.map((v,i)=>`<span class="celda ${v==null?'cN':v===-1?'cR':'c'+v}" data-tip="Semana ${i+1}: ${v==null?'Sin registro':ESTADO_TXT[v]}"></span>`).join("")}</div><div class="huella-meta">Score <b style="font-family:var(--util)">${s}</b> · <span class="tend ${tn}">${tn==="up"?"▲":tn==="down"?"▼":"◆"}</span><br>Consist. ${co}% · Últ.4 ${lr}%${rec?` · ${rec} recaída${rec>1?"s":""}`:""}</div></div>`;}).join(""):`<p style="color:var(--ink-3)">Aún no hay registros en la Huella. Use el formulario para registrar la primera semana por microobjetivo. Las personas recién cargadas desde las fichas inician aquí su traza prospectiva.</p>`}
+  </div>
+  <h2 class="sec">Registrar <em>semana</em></h2>
+  <div class="tarjeta reveal">
+    <div class="ayuda">Una entrada por semana y pilar. Registro diferido de semanas pasadas permitido; no se permiten semanas futuras (máximo la en curso, ${semAct}). Corregir una semana genera una nueva entrada (la última vigente); nada se borra. ${online()?"Cada registro se guarda en Supabase.":"Modo demo: solo en memoria."}</div>
+    ${pilObjetivo.length?`<form id="form-registro" class="grid g4" style="align-items:end">
+      <div><label class="campo">Pilar</label><select name="pilar" onchange="state.regPilar=this.value;render()">${pilObjetivo.map(pl=>`<option value="${pl.id}" ${state.regPilar===pl.id?"selected":""}>${pl.nombre}</option>`).join("")}</select></div>
+      <div><label class="campo">Semana</label><select name="sem">${(()=>{const id=state.regPilar&&p.huella[state.regPilar]!==undefined?state.regPilar:pilObjetivo[0].id;const t=p.huella[id]||[];const ops=[];for(let i=semAct;i>=1;i--){const v=t[i-1];ops.push(`<option value="${i}">${i===semAct?"Semana "+i+" (en curso)":"Semana "+i}${v==null?" · sin registro":" · corregir"}</option>`);}return ops.join("");})()}</select></div>
+      <div><label class="campo">Resultado</label><select name="valor"><option value="2">Logrado</option><option value="1">Parcial</option><option value="0">No logrado</option><option value="-1">Recaída</option></select></div>
+      <div style="display:flex;gap:8px"><button class="btn" type="submit">Guardar</button>${UNDO.length?`<button class="btn linea" type="button" onclick="deshacer()">Deshacer</button>`:""}</div>
+    </form>`:`<p style="color:var(--ink-3)">Defina microobjetivos en el próximo control para iniciar la traza.</p>`}
+    ${state.regMsg?`<p style="margin-top:10px;font-family:var(--util);font-size:12.5px;color:var(--verde-med)">${esc(state.regMsg)}</p>`:""}
+  </div>`;
+}
+async function guardarRegistro(e){
+  e.preventDefault();const p=pac();const fd=new FormData(e.target);
+  const pilar=fd.get("pilar")||Object.keys(p.huella)[0];const sem=parseInt(fd.get("sem"),10);const valor=parseInt(fd.get("valor"),10);
+  if(!sem||sem>semanaActual(p))return;
+  if(!p.huella[pilar])p.huella[pilar]=[];
+  const t=p.huella[pilar];while(t.length<sem)t.push(null);const prev=t[sem-1];const corr=prev!=null;
+  UNDO.push({pid:p.id,pilar,sem,prev});t[sem-1]=valor;p.ultimo_registro=hoyISO();
+  state.regMsg=`${corr?"Corrección":"Registro"} guardado: ${PIL[pilar]}, semana ${sem} → ${ESTADO_TXT[valor]}${online()?"":" (demo)"}.`;
+  if(online()&&db){try{await db.from("huella").insert({paciente_id:p.id,pilar,semana:sem,fecha_semana:hoyISO(),valor,correccion:corr,registrado_por:"equipo"});await db.from("pacientes").update({ultimo_registro:hoyISO()}).eq("id",p.id);}catch(err){state.regMsg="Guardado local; falló la sincronización: "+(err.message||err);}}
+  render();
+}
+window.deshacer=function(){const u=UNDO.pop();if(!u)return;const p=PACIENTES.find(x=>x.id===u.pid);p.huella[u.pilar][u.sem-1]=u.prev;state.regMsg=`Deshecho: ${PIL[u.pilar]}, semana ${u.sem}. (En Supabase queda el registro; corrija con una nueva entrada.)`;render();};
+
+/* ===== Zonas Azules ===== */
+function tBZ(p){
+  const sc=bzScore(p);const ev=bzEvaluados(p);const max=ev*2;const pct=max?Math.round(sc/max*100):0;
+  const nivel=ev===0?"Pesquisa pendiente":pct>=70?"Alta proximidad":pct>=40?"Proximidad en construcción":"Amplio espacio de oportunidad";
+  const oportunidades=BZ_ITEMS.filter(it=>(p.bz[it.id]||0)<2).sort((a,b)=>(p.bz[a.id]||0)-(p.bz[b.id]||0)).slice(0,4);
+  const protectores=BZ_ITEMS.filter(it=>p.bz[it.id]===2);
+  return `
+  <div class="ayuda">Pesquisa inspirada en longevidad saludable (Zonas Azules / Power 9 — divulgativo, no instrumento validado). Cada ítem: presente (2), parcial (1), ausente (0); los no consignados quedan "no evaluados". Lectura orientadora y no culpabilizante.</div>
+  <div class="grid g2">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Índice de proximidad protectora</h3>
+      <div class="gauge-wrap"><div class="gauge" style="background:conic-gradient(var(--gold) 0 ${pct}%, #E4EAE4 ${pct}% 100%)"><div class="interior"><div><div class="valor">${sc}</div><div class="de">de ${max||20}</div></div></div></div>
+        <div><div class="chip ${ev===0?'gris':pct>=70?'verde':pct>=40?'gold':'ambar'}">${nivel}</div><p style="font-size:13.5px;margin-top:10px;max-width:34ch">${ev} de 10 ítems pesquisados. Sirve para conversar fortalezas y elegir el siguiente paso, nunca para calificar.</p></div></div>
+      <h3 class="sub" style="margin-top:20px">Factores protectores presentes</h3>
+      ${protectores.length?`<ul class="lista-limpia">${protectores.map(it=>`<li>${esc(it.txt)}</li>`).join("")}</ul>`:'<p style="color:var(--ink-3);font-size:13.5px">Por consolidar / pesquisar.</p>'}
+    </div>
+    <div class="tarjeta reveal">
+      <h3 class="sub">Pesquisa de 10 hábitos protectores</h3>
+      ${BZ_ITEMS.map(it=>{const raw=p.bz[it.id];const v=raw==null?-9:raw;return `<div class="bz-item"><span class="punto ${v===2?'verde':v===1?'ambar':'gris'} estado" style="${v===-9?'opacity:.4':''}"></span><div><strong>${esc(it.txt)}</strong><small>${v===2?"Presente":v===1?"Parcial":v===0?"Ausente":"No evaluado"} · ${PIL[it.pilar]}</small></div></div>`;}).join("")}
+    </div>
+  </div>
+  <h2 class="sec">Oportunidades de <em>intervención</em></h2>
+  <div class="tarjeta reveal">${oportunidades.map(it=>`<div class="bz-item"><span class="punto ambar estado"></span><div><strong>${PIL[it.pilar]}</strong> — ${esc(it.txt)}.<small>Sugerencia: convertir en microobjetivo semanal registrable en la Huella.</small></div></div>`).join("")}</div>`;
+}
+
+/* ===== Retroalimentación ===== */
+function tRetro(p){
+  const nombre=(p.nombre||"").split(" ")[0];
+  const avances=PILARES.filter(pl=>p.huella[pl.id]&&progresoSostenido(p.huella[pl.id]));
+  const logradas=(p.metas||[]).filter(m=>m.estado==="lograda");
+  const conTraza=PILARES.filter(pl=>p.huella[pl.id]&&p.huella[pl.id].length);
+  const prioritario=conTraza.sort((a,b)=>scorePilar(p,a.id)-scorePilar(p,b.id))[0];
+  const siguiente=(p.metas||[]).find(m=>m.estado==="en_curso"||m.estado==="pendiente");
+  const prot=protectoresDe(p);const fort=[...prot.bz.slice(0,2),...prot.cons.slice(0,2),...prot.fac.slice(0,2)].map(t=>t.charAt(0).toLowerCase()+t.slice(1));
+  return `
+  <div class="ayuda">Mensaje generado desde la Huella, las metas y las fortalezas, con lenguaje empático y motivacional (entrevista motivacional y activación de la persona). El equipo puede editarlo antes de entregarlo.</div>
+  <div class="carta reveal">
+    <h3>Tu avance en <em>VitalÆ</em></h3>
+    <div style="font-family:var(--util);font-size:11.5px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase">Devolución para ${esc(nombre)} · ${fmtFecha(hoyISO())}</div>
+    ${avances.length?`<p><strong>Lo que estás logrando.</strong> Llevas al menos cuatro semanas seguidas avanzando en ${avances.map(a=>PIL[a.id].toLowerCase()).join(" y ")}. Esa constancia es lo que consolida un hábito.</p>`:`<p><strong>Lo que estás construyendo.</strong> Estás en la etapa donde el registro mismo ya es un logro: cada semana anotada es información valiosa para avanzar a tu ritmo.</p>`}
+    ${logradas.length?`<p><strong>Metas cumplidas.</strong> ${logradas.map(m=>"«"+esc(m.texto)+"»").join(" · ")}. Reconócelo: fue tu decisión y tu esfuerzo.</p>`:""}
+    ${prioritario?`<p><strong>Dónde enfocar ahora.</strong> El área con más espacio para crecer es ${PIL[prioritario.id].toLowerCase()}. Un solo paso pequeño y realista esta semana.</p>`:""}
+    ${siguiente?`<div class="bloque-nota"><strong>Tu siguiente meta:</strong> ${esc(siguiente.texto)}</div>`:""}
+    ${fort.length?`<p><strong>Fortalezas que ya te protegen.</strong> ${fort.map(esc).join("; ")}. Son cimientos tuyos — el plan se construye sobre ellos.</p>`:""}
+    <p class="firma">Equipo VitalÆ · Dra. Valeria Alarcón</p>
+  </div>
+  <div style="margin-top:14px"><button class="btn linea" onclick="window.print()">Imprimir / guardar PDF</button></div>`;
+}
+
+/* ===== Reporte ===== */
+function tReporte(p){
+  const ctr=[...(p.controles||[])].sort((a,b)=>(a.fecha<b.fecha?1:-1));const c=ctr[0];const flags=banderas(p);
+  return `
+  <div class="ayuda">Resumen estructurado de la última atención para la ficha clínica.</div>
+  <div class="tarjeta reveal">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center"><h3 class="sub" style="margin:0">Reporte · ${c?(c.tipo+" · "+fmtFecha(c.fecha)):"sin controles"}</h3>${hayAdh(p)?`<span class="chip gold">Adherencia ${adherenciaGlobal(p)}</span>`:""}</div>
+    ${c&&c.evaluacion?`<h3 class="sub" style="margin-top:16px">Evaluación</h3><p>${esc(c.evaluacion)}</p>`:""}
+    <h3 class="sub" style="margin-top:16px">Diagnósticos activos</h3><p>${(p.diagnosticos||[]).filter(d=>d.activo!==false).map(d=>esc(d.diagnostico)).join(" · ")||"—"}</p>
+    <h3 class="sub" style="margin-top:16px">Recetas vigentes</h3>
+    <ul class="lista-limpia">${(p.recetas||[]).filter(r=>r.estado==="vigente").map(r=>`<li>${FORMULACION_LABEL[r.tipo_formulacion]||r.tipo_formulacion}${r.ratio_thc_cbd?` · THC:CBD ${esc(r.ratio_thc_cbd)}`:""}${r.total_receta?` · ${esc(r.total_receta)}`:""}</li>`).join("")||'<li style="color:var(--ink-3)">—</li>'}</ul>
+    <h3 class="sub" style="margin-top:16px">Metas SMART</h3>
+    <ul class="lista-limpia">${(p.metas||[]).map(m=>`<li>${esc(m.texto)} <span class="chip ${m.estado==='lograda'?'verde':m.estado==='en_curso'?'gold':'gris'}" style="margin-left:6px">${(m.estado||"").replace("_"," ")}</span></li>`).join("")||'<li style="color:var(--ink-3)">—</li>'}</ul>
+    <h3 class="sub" style="margin-top:16px">Alertas del sistema</h3>
+    ${flags.length?flags.map(f=>`<div class="bz-item"><span class="punto ${f.tipo} estado"></span><div>${esc(f.txt)}</div></div>`).join(""):'<p style="color:var(--ink-3)">Sin alertas.</p>'}
+    <h3 class="sub" style="margin-top:16px">Siguiente paso</h3><p>${c&&c.proxima_accion?esc(c.proxima_accion):"—"}${p.proximo_control?` · Próximo control: ${fmtFecha(p.proximo_control)}`:""}</p>
+  </div>
+  <div style="margin-top:14px"><button class="btn linea" onclick="window.print()">Imprimir / guardar PDF</button></div>`;
+}
+
+/* ===== Nueva persona ===== */
+function vNuevo(){
+  return `
+  <div class="tope"><div><div class="eyebrow">Ingreso</div><h1>Nueva persona <em>atendida</em></h1></div>
+  <div class="tope-der"><button class="btn linea" onclick="state.vista='pacientes';render()">← Volver</button></div></div>
+  <div class="ayuda gold">${online()?"Se guardará en Supabase bajo tu sesión autenticada (RLS activo). Registra el nombre real: la base está protegida.":"Modo demo: la ficha quedará solo en memoria. Para persistir, conecta Supabase (pestaña Método y datos)."}</div>
+  <form id="form-nuevo">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Identificación</h3>
+      <div class="grid g4">
+        <div><label class="campo">Nombre *</label><input name="nombre" required></div>
+        <div><label class="campo">RUT</label><input name="rut"></div>
+        <div><label class="campo">Nacimiento</label><input name="fnac" type="date"></div>
+        <div><label class="campo">Sexo biológico</label><select name="sexo"><option value="">—</option><option>femenino</option><option>masculino</option><option>intersex</option></select></div>
+        <div><label class="campo">Tipo de consulta</label><select name="tipo"><option value="medicina_cannabica">Medicina Cannábica</option><option value="medicina_estilo_vida">Medicina del Estilo de Vida</option><option value="medicina_integrativa">Medicina Integrativa</option><option value="mixta">Mixta</option></select></div>
+        <div><label class="campo">Comuna</label><input name="comuna"></div>
+        <div><label class="campo">Previsión</label><input name="prevision" placeholder="FONASA / ISAPRE"></div>
+        <div><label class="campo">Ocupación</label><input name="ocupacion"></div>
+      </div>
+      <div class="grid g2" style="margin-top:4px">
+        <div><label class="campo">Motivo de consulta *</label><textarea name="motivo" rows="2" required></textarea></div>
+        <div><label class="campo">Prioridades (en sus palabras)</label><textarea name="prioridades" rows="2"></textarea></div>
+      </div>
+    </div>
+    <h2 class="sec">Evaluación inicial por <em>pilar</em></h2>
+    <div class="ayuda">Prioridad 1 = más prioritario. M/A 1–10 (vacío → «NC»). Los pilares con prioridad 1–3 inician traza en la Huella.</div>
+    <div class="tarjeta reveal" style="overflow-x:auto">
+      <table class="tabla"><thead><tr><th>Pilar</th><th>Prioridad</th><th>Etapa</th><th>M</th><th>A</th><th>Línea base</th></tr></thead><tbody>
+      ${PILARES.map((pl,i)=>`<tr><td style="font-family:var(--util);font-weight:700;font-size:12.5px;white-space:nowrap">${pl.nombre}</td>
+        <td><select name="pr_${pl.id}" style="width:62px">${[1,2,3,4,5,6,7,8,9].map(n=>`<option ${n===i+1?"selected":""}>${n}</option>`).join("")}</select></td>
+        <td><select name="et_${pl.id}" style="width:150px">${ETAPAS.map(e=>`<option value="${e}">${ETAPA_LABEL[e]}</option>`).join("")}</select></td>
+        <td><input name="m_${pl.id}" type="number" min="1" max="10" style="width:58px"></td>
+        <td><input name="a_${pl.id}" type="number" min="1" max="10" style="width:58px"></td>
+        <td><input name="b_${pl.id}" placeholder="Breve"></td></tr>`).join("")}
+      </tbody></table>
+    </div>
+    <div style="margin-top:16px"><button class="btn" type="submit">Crear ficha</button></div>
+  </form>`;
+}
+async function crearPersona(e){
+  e.preventDefault();const fd=new FormData(e.target);
+  const hoy=hoyISO();const prox=new Date(HOY.getTime()+28*86400000).toISOString().slice(0,10);
+  const codigo="VIT-"+String(PACIENTES.length+1).padStart(4,"0");
+  const base={codigo,nombre:fd.get("nombre"),rut:fd.get("rut")||null,fecha_nacimiento:fd.get("fnac")||null,sexo_biologico:fd.get("sexo")||null,comuna:fd.get("comuna")||null,prevision:fd.get("prevision")||null,ocupacion:fd.get("ocupacion")||null,tipo_consulta:fd.get("tipo"),fecha_ingreso:hoy,proximo_control:prox,ultimo_registro:hoy,motivo_consulta:fd.get("motivo"),prioridades:fd.get("prioridades")||null,narrativa_clinica:"Ficha creada en ingreso.",estado:"activo"};
+  const pilRows=PILARES.map(pl=>{const m=fd.get("m_"+pl.id),a=fd.get("a_"+pl.id);return {pilar:pl.id,fecha:hoy,linea_base:fd.get("b_"+pl.id)||null,nivel_riesgo:"no_evaluado",motivacion:m?parseInt(m,10):null,autoeficacia:a?parseInt(a,10):null,etapa_cambio:fd.get("et_"+pl.id),prioridad:parseInt(fd.get("pr_"+pl.id),10),barreras:[],observaciones:""};});
+  if(online()&&db){try{const {data,error}=await db.from("pacientes").insert(base).select("id").single();if(error)throw error;await db.from("pilares_eval").insert(pilRows.map(r=>Object.assign({paciente_id:data.id},r)));await cargarDesdeSupabase();irFicha(data.id,"perfil");return;}catch(err){alert("No se pudo guardar en Supabase: "+(err.message||err));return;}}
+  const id="local"+Date.now();const pilares=pilaresVacios();
+  pilRows.forEach(r=>{pilares[r.pilar]={base:r.linea_base,riesgo:r.nivel_riesgo,mot:r.motivacion,auto:r.autoeficacia,etapa:r.etapa_cambio,prioridad:r.prioridad,barreras:[],obs:"",hist:[]};});
+  PACIENTES.push(Object.assign({id,diagnosticos:[],antecedentes:[],medicamentos:[],anamnesis:null,recetas:[],controles:[{fecha:hoy,tipo:"ingreso",canal:"virtual",acuerdos:["Definir microobjetivos e iniciar Huella"],proximo_control:prox}],pilares,huella:{},metas:[],microobjetivos:[],bz:{}},base));
+  irFicha(id,"perfil");
+}
+
+/* ===== Método y datos ===== */
+function vMetodo(){
+  return `
+  <div class="tope"><div><div class="eyebrow">Transparencia</div><h1>Método y <em>datos</em></h1></div></div>
+  <div class="grid g2">
+    <div class="tarjeta reveal">
+      <h3 class="sub">Marco conceptual</h3>
+      <p style="font-size:14px">Alineado con competencias IBLM, los 6 pilares SOCHIMEV (<em>fuente oficial a verificar</em>) más 3 pilares ampliados VitalÆ (vida sexual, salud laboral, espiritualidad/sentido), e integrado con la práctica de Medicina Cannábica (diagnósticos, recetas magistrales, controles). Pesquisa de hábitos protectores inspirada en Zonas Azules (Power 9, divulgativo; no validado).</p>
+      <h3 class="sub" style="margin-top:16px">Indicadores internos de seguimiento</h3>
+      <ul class="lista-limpia">
+        <li><strong>Score por pilar (0–100)</strong> = 40% logro últimas 4 semanas + 30% consistencia + 15% motivación + 15% autoeficacia.</li>
+        <li><strong>Adherencia global</strong>: promedio ponderado (prioridad 1–3 pesa doble).</li>
+        <li><strong>Riesgo de abandono</strong>: control programado vencido hace más de 30 días sin reagendar. Se apaga al registrar un nuevo control de seguimiento (que fija el próximo control).</li>
+        <li><strong>Radar de pilares</strong>: combina etapa de cambio, motivación/autoeficacia y Huella.</li>
+      </ul>
+      <div class="ayuda" style="margin-top:14px">Todos los puntajes son <strong>indicadores internos de seguimiento</strong>, no instrumentos validados ni diagnósticos.</div>
+    </div>
+    <div class="tarjeta reveal">
+      <h3 class="sub">Conexión de datos</h3>
+      <div class="dato-par"><b>Backend</b><span>${online()?"Supabase (Postgres + Auth + RLS)":"No configurado (demo)"}</span></div>
+      <div class="dato-par"><b>Estado</b><span>${online()?(SESION?('<span class="chip verde">Autenticado: '+esc(SESION.user.email)+'</span>'):'<span class="chip ambar">Sin sesión</span>'):'<span class="chip gris">Modo demo local</span>'}</span></div>
+      <div class="dato-par"><b>Pacientes cargados</b><span>${PACIENTES.length}</span></div>
+      ${online()&&SESION?`<div style="margin-top:12px"><button class="btn linea mini" onclick="cerrarSesion()">Cerrar sesión</button></div>`:""}
+      <h3 class="sub" style="margin-top:18px">Cómo conectar Supabase</h3>
+      <ol style="font-size:13px;padding-left:18px;line-height:1.7">
+        <li>Crear proyecto en supabase.com.</li>
+        <li>SQL Editor → correr <code>supabase-schema.sql</code>.</li>
+        <li>SQL Editor → correr <code>supabase-seed-pacientes.sql</code>.</li>
+        <li>Crear usuario del equipo (Authentication → Users) + agregarlo a <code>staff_autorizado</code>.</li>
+        <li>Pegar URL y clave anon en el bloque <code>CONFIG</code> de este archivo.</li>
+      </ol>
+      <div class="ayuda gold" style="margin-top:12px"><strong>Privacidad:</strong> la clave anon es pública por diseño; la seguridad la dan el RLS + Auth. Los datos identificables solo son visibles para el <code>staff_autorizado</code> autenticado.</div>
+    </div>
+  </div>
+  <h2 class="sec">Supuestos, límites y <em>cumplimiento</em></h2>
+  <div class="tarjeta reveal"><ul class="lista-limpia">
+    <li><strong>Operativo, no diagnóstico.</strong> Scores e índices priorizan la conversación clínica; no diagnostican ni clasifican riesgo de forma validada.</li>
+    <li><strong>Interpretación de las fichas.</strong> Etapa de cambio y prioridad por pilar son interpretación; motivación/autoeficacia quedan «NC» cuando la ficha no usó la escala 1–10. Las discrepancias de dato se consignan en cada ficha.</li>
+    <li><strong>Datos sensibles de salud.</strong> Requieren base cifrada, control de acceso por rol, auditoría y respaldo — provistos por Supabase (RLS, Auth, tabla <code>auditoria</code>). Antes de uso con pacientes reales: revisar Ley 21.719 (vigencia Dic 2026 — <em>verificar con asesoría legal</em>) y Ley 20.584, y acuerdo de tratamiento de datos.</li>
+    <li><strong>Medicina Cannábica.</strong> Recetas y educación legal (Ley 20.000 / Ley 21.817) se registran como en la ficha; la app no reemplaza recemed.cl.</li>
+  </ul></div>
+  ${pieEtico}`;
+}
+window.cerrarSesion=async function(){if(db){await db.auth.signOut();}location.reload();};
+
+/* ===== Arranque ===== */
+function setConn(){const el=$("#conn"),t=$("#conn-txt");if(online()&&SESION){el.className="conn on";t.textContent="Supabase conectado";}else if(online()){el.className="conn off";t.textContent="Supabase: sin sesión";}else{el.className="conn off";t.textContent="Modo demo";}$("#pie-ver").textContent="Prototipo v3.1"+(online()?" · Supabase":" · demo");}
+async function iniciarApp(){try{await cargarDesdeSupabase();}catch(err){console.error(err);main.innerHTML=`<div class="tarjeta" style="margin:30px"><h3 class="sub">Error al cargar datos</h3><p>${esc(err.message||String(err))}</p><p style="color:var(--ink-3);font-size:13px">Revisa que el esquema y el seed se hayan corrido y que tu usuario esté en <code>staff_autorizado</code>.</p></div>`;return;}if(PACIENTES[0])state.pacienteId=PACIENTES[0].id;setConn();render();}
+function mostrarLogin(s){$("#login").classList.toggle("oculto",!s);}
+async function boot(){
+  document.body.classList.add("js-loaded");
+  setConn();
+  if(!online()){PACIENTES=datosDemo();state.pacienteId=PACIENTES[0].id;render();return;}
+  const {data:{session}}=await db.auth.getSession();
+  if(session){SESION=session;mostrarLogin(false);await iniciarApp();}else{mostrarLogin(true);}
+  $("#form-login").addEventListener("submit",async ev=>{ev.preventDefault();const fd=new FormData(ev.target);const msg=$("#login-msg");msg.className="login-msg";msg.textContent="Ingresando…";const {data,error}=await db.auth.signInWithPassword({email:fd.get("email"),password:fd.get("pass")});if(error){msg.className="login-msg err";msg.textContent=error.message;return;}SESION=data.session;msg.className="login-msg ok";msg.textContent="Bienvenido/a.";mostrarLogin(false);setConn();await iniciarApp();});
+}
+boot();
+</script>
+</body>
+</html>

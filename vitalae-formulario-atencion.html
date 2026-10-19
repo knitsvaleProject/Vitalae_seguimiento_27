@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalÆ · Formulario de atención</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#2D5F4F;--verde-osc:#1F4438;--verde-med:#3F7A66;--verde-suave:#E3EDE7;--verde-linea:#CBDCD3;
+  --crema:#F0F4EE;--blanco:#FDFEFC;--granate:#8B3A3A;--gold:#C4A878;--gold-osc:#A88B58;--gold-suave:#F4EDDF;
+  --morado:#5B4B7A;--ink:#1E2B26;--ink-2:#48584F;--ink-3:#77857D;--r:14px;
+  --serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--util:'Manrope',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--crema);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:28px 22px 80px}
+header.hd{text-align:center;margin-bottom:8px}
+.marca{font-family:var(--serif);font-size:38px;color:var(--verde-osc)}
+.marca em{color:var(--gold-osc);font-style:italic}
+.hd .sub{font-family:var(--util);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-top:2px}
+.intro{background:var(--gold-suave);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 15px;font-size:13px;color:var(--ink-2);margin:18px 0 22px;line-height:1.55}
+.card{background:var(--blanco);border:1px solid var(--verde-linea);border-radius:var(--r);box-shadow:0 2px 10px rgba(31,68,56,.06);padding:20px 22px;margin-bottom:16px}
+.card h2{font-family:var(--serif);font-weight:400;font-size:19px;color:var(--verde-osc);margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.card h2 .n{font-family:var(--util);font-size:12px;font-weight:800;color:#fff;background:var(--verde-med);width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;flex:none}
+.card .hint{font-size:12.5px;color:var(--ink-3);margin-bottom:12px}
+.row{display:grid;gap:14px}
+.r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:1fr 1fr 1fr}.r4{grid-template-columns:1fr 1fr 1fr 1fr}
+label.c{font-family:var(--util);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:block;margin:0 0 5px}
+label.c .opt{color:var(--gold-osc);font-weight:700}
+input,select,textarea{font-family:var(--sans);font-size:14px;color:var(--ink);background:#fff;border:1.5px solid var(--verde-linea);border-radius:9px;padding:9px 11px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--verde-med);outline-offset:1px}
+textarea{resize:vertical}
+.destacado{border:1.5px solid var(--gold);background:var(--gold-suave)}
+.destacado label.c{color:var(--gold-osc)}
+details{border:1px solid var(--verde-linea);border-radius:10px;margin-bottom:16px;background:var(--blanco);overflow:hidden}
+details summary{cursor:pointer;padding:16px 22px;font-family:var(--serif);font-size:19px;color:var(--verde-osc);list-style:none;display:flex;align-items:center;gap:10px}
+details summary::-webkit-details-marker{display:none}
+details summary .n{font-family:var(--util);font-size:12px;font-weight:800;color:var(--verde-med);background:var(--verde-suave);width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center}
+details summary .chev{margin-left:auto;transition:transform .2s;color:var(--ink-3)}
+details[open] summary .chev{transform:rotate(90deg)}
+details .inner{padding:0 22px 20px}
+.pilar-fila{display:grid;grid-template-columns:150px 70px 70px 1fr 2fr;gap:10px;align-items:end;padding:7px 0;border-bottom:1px solid #EDF1EC}
+.pilar-fila:last-child{border:none}
+.pilar-fila .pn{font-family:var(--util);font-weight:700;font-size:12.5px;padding-bottom:9px}
+.receta-fila{border:1px solid var(--verde-linea);border-left:4px solid var(--morado);border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+.receta-fila .del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--granate);cursor:pointer;font-size:18px;font-weight:700}
+.btn{font-family:var(--util);font-weight:700;font-size:13px;border-radius:10px;padding:10px 18px;border:1.5px solid var(--verde);background:var(--verde);color:#fff;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.linea{background:transparent;color:var(--verde)}
+.btn.linea:hover{background:var(--verde-suave)}
+.btn.mini{padding:7px 13px;font-size:12.5px}
+.acciones{position:sticky;bottom:0;background:linear-gradient(transparent,var(--crema) 30%);padding:18px 0 6px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;z-index:5}
+.salida{margin-top:8px}
+.salida .tabsal{display:flex;gap:4px;border-bottom:1.5px solid var(--verde-linea);margin-bottom:0}
+.salida .ts{font-family:var(--util);font-weight:700;font-size:12.5px;color:var(--ink-3);background:none;border:none;padding:9px 14px;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;cursor:pointer}
+.salida .ts.on{color:var(--verde-osc);border-bottom-color:var(--gold)}
+pre{background:#1F2A26;color:#D7E4DC;border-radius:0 0 12px 12px;padding:16px 18px;font-family:'Consolas',monospace;font-size:12.5px;line-height:1.55;overflow:auto;max-height:420px;white-space:pre-wrap;word-break:break-word}
+.copybar{display:flex;gap:10px;justify-content:flex-end;padding:10px 0}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--verde-osc);color:#fff;font-family:var(--util);font-size:13px;font-weight:600;padding:11px 20px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pie{text-align:center;font-family:var(--util);font-size:11.5px;color:var(--ink-3);margin-top:30px;line-height:1.6}
+.req{color:var(--granate)}
+@media(max-width:720px){.r2,.r3,.r4{grid-template-columns:1fr}.pilar-fila{grid-template-columns:1fr 1fr;gap:8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hd">
+    <div class="marca">Vital<em>æ</em></div>
+    <div class="sub">Formulario de atención · Medicina Cannábica y Estilo de Vida</div>
+  </header>
+  <div class="intro">
+    <strong>Para la Dra. Alarcón.</strong> Complete esta ficha después de cada atención o control. Al finalizar, presione <strong>Generar</strong>: obtendrá un archivo <code>.json</code> (para enviar a Ismael / al sistema) y un bloque <strong>SQL</strong> listo para pegar en Supabase. Registrar el control <strong>apaga la alerta de abandono</strong> del paciente, porque fija su próximo control. Solo los campos con <span class="req">*</span> son obligatorios; el resto, complételos cuando corresponda.
+  </div>
+
+  <form id="f">
+    <!-- 1 Persona -->
+    <div class="card">
+      <h2><span class="n">1</span> Persona atendida</h2>
+      <div class="row r2">
+        <div>
+          <label class="c">Paciente <span class="req">*</span></label>
+          <select name="codigo" id="sel-pac" required></select>
+        </div>
+        <div id="box-nuevo" style="display:none">
+          <label class="c">Nombre completo de la nueva persona <span class="req">*</span></label>
+          <input name="nuevo_nombre" placeholder="Nombre y apellidos">
+        </div>
+      </div>
+      <div class="row r4" id="box-nuevo2" style="display:none;margin-top:12px">
+        <div><label class="c">RUT</label><input name="nuevo_rut"></div>
+        <div><label class="c">Nacimiento</label><input name="nuevo_fnac" type="date"></div>
+        <div><label class="c">Sexo biológico</label><select name="nuevo_sexo"><option value="">—</option><option>femenino</option><option>masculino</option><option>intersex</option></select></div>
+        <div><label class="c">Previsión</label><input name="nuevo_prevision" placeholder="FONASA / ISAPRE"></div>
+      </div>
+    </div>
+
+    <!-- 2 Atención -->
+    <div class="card">
+      <h2><span class="n">2</span> Datos de la atención</h2>
+      <div class="row r3">
+        <div><label class="c">Fecha <span class="req">*</span></label><input name="fecha" type="date" required></div>
+        <div><label class="c">Tipo <span class="req">*</span></label><select name="tipo" required><option value="control">Control de seguimiento</option><option value="ingreso">Ingreso</option><option value="seguimiento">Seguimiento (WhatsApp/breve)</option></select></div>
+        <div><label class="c">Canal</label><select name="canal"><option value="virtual">Virtual</option><option value="presencial">Presencial</option><option value="whatsapp">WhatsApp</option><option value="telefonico">Telefónico</option></select></div>
+      </div>
+    </div>
+
+    <!-- 3 SOAP -->
+    <div class="card">
+      <h2><span class="n">3</span> Evolución (S · O · A)</h2>
+      <div class="hint">Relato de la persona, hallazgos objetivos y su análisis clínico.</div>
+      <label class="c">Subjetivo — lo que relata la persona</label>
+      <textarea name="subjetivo" rows="3" placeholder="Síntomas, respuesta al tratamiento, cambios desde el último control…"></textarea>
+      <label class="c" style="margin-top:12px">Objetivo — hallazgos, EVA, medidas</label>
+      <textarea name="objetivo" rows="2" placeholder="Ej: EVA 2–4; buena respuesta a terapia nocturna…"></textarea>
+      <label class="c" style="margin-top:12px">Evaluación / análisis clínico</label>
+      <textarea name="evaluacion" rows="2" placeholder="Interpretación clínica del control…"></textarea>
+    </div>
+
+    <!-- 4 Plan -->
+    <div class="card">
+      <h2><span class="n">4</span> Plan y acuerdos</h2>
+      <label class="c">Acuerdos del control <span class="opt">(uno por línea)</span></label>
+      <textarea name="acuerdos" rows="4" placeholder="Repetir receta de flores&#10;Iniciar desprescripción de BZD&#10;Agregar aceite sublingual nocturno"></textarea>
+      <div class="row r2" style="margin-top:12px">
+        <div><label class="c">Próxima acción acordada</label><input name="proxima_accion" placeholder="Qué se hará antes / en el próximo control"></div>
+        <div class="destacado" style="padding:10px 12px;border-radius:10px">
+          <label class="c">Próximo control <span class="req">*</span> <span style="font-weight:400;text-transform:none;letter-spacing:0">— apaga la alerta de abandono</span></label>
+          <input name="proximo_control" type="date" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 Pilares -->
+    <details>
+      <summary><span class="n">5</span> Evolución por pilar <span style="font-size:13px;color:var(--ink-3);font-weight:400;font-family:var(--sans)">— opcional</span><span class="chev">▸</span></summary>
+      <div class="inner">
+        <div class="hint">Complete solo los pilares que reevaluó. Motivación (M) y autoeficacia (A) en escala 1–10 (regla de escala de la entrevista motivacional). Cada pilar que complete genera una nueva valoración con fecha de hoy; los demás conservan su valor previo.</div>
+        <div id="pilares"></div>
+      </div>
+    </details>
+
+    <!-- 6 Recetas -->
+    <details>
+      <summary><span class="n">6</span> Recetas emitidas en este control <span style="font-size:13px;color:var(--ink-3);font-weight:400;font-family:var(--sans)">— opcional</span><span class="chev">▸</span></summary>
+      <div class="inner">
+        <div class="hint">Agregue una fila por formulación emitida (flores, aceite, trociscos, vaporizador…).</div>
+        <div id="recetas"></div>
+        <button type="button" class="btn linea mini" onclick="addReceta()">+ Agregar receta</button>
+      </div>
+    </details>
+
+    <!-- 7 Señales -->
+    <details>
+      <summary><span class="n">7</span> Recaídas, facilitadores, barreras y educación <span style="font-size:13px;color:var(--ink-3);font-weight:400;font-family:var(--sans)">— opcional</span><span class="chev">▸</span></summary>
+      <div class="inner">
+        <div class="row r2">
+          <div><label class="c">Recaídas <span class="opt">(pilar o tema, uno por línea)</span></label><textarea name="recaidas" rows="2"></textarea></div>
+          <div><label class="c">Facilitadores <span class="opt">(uno por línea)</span></label><textarea name="facilitadores" rows="2"></textarea></div>
+          <div><label class="c">Barreras nuevas <span class="opt">(una por línea)</span></label><textarea name="barreras_nuevas" rows="2"></textarea></div>
+          <div><label class="c">Educación entregada <span class="opt">(un tema por línea)</span></label><textarea name="educacion" rows="2"></textarea></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 8 Validación -->
+    <details>
+      <summary><span class="n">8</span> Validación / correcciones de la ficha <span style="font-size:13px;color:var(--ink-3);font-weight:400;font-family:var(--sans)">— opcional</span><span class="chev">▸</span></summary>
+      <div class="inner">
+        <div class="hint">Si al revisar la ficha detecta un dato que corregir (RUT, fecha, ratio, duración, apellido, etc.), descríbalo aquí. Quedará registrado como nota de validación para actualizar la ficha.</div>
+        <textarea name="validacion" rows="3" placeholder="Ej: El RUT correcto de Matías es … / La duración de la receta de Christian es 6 meses, no 3 / Confirmo todos los datos revisados."></textarea>
+      </div>
+    </details>
+
+    <div class="acciones">
+      <button type="submit" class="btn">Generar atención</button>
+      <button type="reset" class="btn linea">Limpiar</button>
+    </div>
+  </form>
+
+  <div id="salida" class="salida" style="display:none">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:16px 22px"><h2 style="font-family:var(--serif);font-weight:400;font-size:19px;color:var(--verde-osc)">Resultado generado</h2>
+      <div class="hint" style="margin:4px 0 0">Envíe el <strong>JSON</strong> a Ismael, o pegue el <strong>SQL</strong> directamente en Supabase (SQL Editor → Run). Ambos cargan esta atención a la ficha del paciente.</div></div>
+      <div class="tabsal" style="padding:0 22px">
+        <button class="ts on" data-sal="sql">SQL para Supabase</button>
+        <button class="ts" data-sal="json">JSON</button>
+      </div>
+      <div class="copybar" style="padding:10px 22px 0"><button class="btn mini" onclick="copiar()">Copiar</button><button class="btn linea mini" onclick="descargar()">Descargar archivo</button></div>
+      <pre id="out"></pre>
+    </div>
+  </div>
+
+  <div class="pie">VitalÆ · Dra. Valeria Alarcón · Uso clínico interno · Los puntajes del sistema son indicadores internos de seguimiento, no instrumentos validados.<br>Documento con datos de pacientes: manéjelo de forma confidencial.</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ===== Roster de pacientes (código · nombre · próximo control actual) ===== */
+const ROSTER=[
+ {codigo:"VIT-0001",nombre:"Licet Carolina Gallegos Hernández"},
+ {codigo:"VIT-0002",nombre:"Domingo Antonio Chiguay Pinto"},
+ {codigo:"VIT-0003",nombre:"Ignacio Omar Aravena Reyes"},
+ {codigo:"VIT-0004",nombre:"Alejandro Ignacio Estevez Garay"},
+ {codigo:"VIT-0005",nombre:"Camila Alejandra Llautureo Ardabán"},
+ {codigo:"VIT-0006",nombre:"Christian Alonso Alfaro Pinto"},
+ {codigo:"VIT-0007",nombre:"Diego Javier González Echeverría"},
+ {codigo:"VIT-0008",nombre:"Fabián Andre Marcel Correa"},
+ {codigo:"VIT-0009",nombre:"Ismael Patricio Vasquez Loyola"},
+ {codigo:"VIT-0010",nombre:"Juan Pablo Hernandez Pavez"},
+ {codigo:"VIT-0011",nombre:"Matias Ignacio Ulloa Araneda"}
+];
+const PILARES=[["alimentacion","Alimentación"],["actividad","Actividad física"],["sueno","Sueño"],["estres","Manejo del estrés"],["social","Relaciones y conectividad"],["sustancias","Sustancias de riesgo"],["sexual","Vida sexual"],["laboral","Salud laboral"],["espiritual","Espiritualidad y sentido"]];
+const ETAPAS=[["","—"],["precontemplacion","Precontemplación"],["contemplacion","Contemplación"],["preparacion","Preparación"],["accion","Acción"],["mantenimiento","Mantenimiento"],["recaida","Recaída"]];
+const FORMS=[["sumidades_floridas","Sumidades floridas (flores)"],["aceite_oral","Aceite oral"],["trociscos","Trociscos"],["solucion_vaporizacion","Solución para vaporización"],["capsulas","Cápsulas"],["topico","Tópico"],["otro","Otro"]];
+
+const $=s=>document.querySelector(s);
+// poblar selector
+const sel=$("#sel-pac");
+sel.innerHTML='<option value="">— Seleccione —</option>'+ROSTER.map(r=>`<option value="${r.codigo}">${r.codigo} · ${r.nombre}</option>`).join("")+'<option value="__nuevo__">➕ Nueva persona (ingreso)</option>';
+sel.addEventListener("change",()=>{const nv=sel.value==="__nuevo__";$("#box-nuevo").style.display=nv?"block":"none";$("#box-nuevo2").style.display=nv?"grid":"none";if(nv)$("select[name=tipo]").value="ingreso";});
+// fecha por defecto hoy
+$("input[name=fecha]").value=new Date().toISOString().slice(0,10);
+// pilares
+$("#pilares").innerHTML=PILARES.map(([id,n])=>`<div class="pilar-fila"><div class="pn">${n}</div>
+  <div><label class="c">M</label><input type="number" min="1" max="10" name="m_${id}" placeholder="1-10"></div>
+  <div><label class="c">A</label><input type="number" min="1" max="10" name="a_${id}" placeholder="1-10"></div>
+  <div><label class="c">Etapa</label><select name="et_${id}">${ETAPAS.map(([v,t])=>`<option value="${v}">${t}</option>`).join("")}</select></div>
+  <div><label class="c">Nueva observación</label><input name="ob_${id}" placeholder="Opcional"></div></div>`).join("");
+// recetas dinámicas
+let nrec=0;
+function addReceta(pref){nrec++;const i=nrec;const d=document.createElement("div");d.className="receta-fila";d.dataset.i=i;
+  d.innerHTML=`<button type="button" class="del" title="Quitar" onclick="this.parentNode.remove()">×</button>
+  <div class="row r3"><div><label class="c">Formulación</label><select name="rf_${i}">${FORMS.map(([v,t])=>`<option value="${v}">${t}</option>`).join("")}</select></div>
+  <div><label class="c">Ratio THC:CBD</label><input name="rr_${i}" placeholder="Ej: 1:1, 9:1"></div>
+  <div><label class="c">Dosis diaria</label><input name="rd_${i}" placeholder="Ej: 2 g, 3 gotas c/12h"></div></div>
+  <div class="row r3" style="margin-top:10px"><div><label class="c">Total mensual</label><input name="rm_${i}" placeholder="Ej: 60 g"></div>
+  <div><label class="c">Duración (meses)</label><input name="ru_${i}" type="number" min="1" placeholder="6"></div>
+  <div><label class="c">Total receta</label><input name="rt_${i}" placeholder="Ej: 360 g"></div></div>
+  <div style="margin-top:10px"><label class="c">Descripción</label><input name="rx_${i}" placeholder="Texto de la receta"></div>`;
+  $("#recetas").appendChild(d);}
+window.addReceta=addReceta;
+
+/* ===== util ===== */
+const q=s=>s==null||s===""?"null":"'"+String(s).replace(/'/g,"''")+"'";
+const arr=xs=>!xs.length?"array[]::text[]":"array["+xs.map(q).join(",")+"]";
+const num=x=>x==null||x===""?"null":String(parseInt(x,10));
+const lineas=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+
+let OUT={sql:"",json:""};
+$("#f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const esNuevo=fd.get("codigo")==="__nuevo__";
+  const codigo=esNuevo?null:fd.get("codigo");
+  if(!esNuevo&&!codigo){toast("Seleccione un paciente");return;}
+  const fecha=fd.get("fecha"),tipo=fd.get("tipo"),canal=fd.get("canal");
+  const prox=fd.get("proximo_control");
+  const sel_pac = esNuevo ? `(select id from pacientes where codigo='${(fd.get("nuevo_rut")||fecha)}' limit 1)` : `(select id from pacientes where codigo='${codigo}')`;
+
+  // pilares con datos
+  const pilares=[];
+  PILARES.forEach(([id])=>{const m=fd.get("m_"+id),a=fd.get("a_"+id),et=fd.get("et_"+id),ob=fd.get("ob_"+id);
+    if(m||a||et||ob)pilares.push({pilar:id,motivacion:m?+m:null,autoeficacia:a?+a:null,etapa:et||null,obs:ob||null});});
+  // recetas
+  const recetas=[];
+  document.querySelectorAll(".receta-fila").forEach(r=>{const i=r.dataset.i;
+    recetas.push({tipo_formulacion:fd.get("rf_"+i),ratio:fd.get("rr_"+i)||null,dosis_diaria:fd.get("rd_"+i)||null,total_mensual:fd.get("rm_"+i)||null,duracion_meses:fd.get("ru_"+i)||null,total_receta:fd.get("rt_"+i)||null,descripcion:fd.get("rx_"+i)||null});});
+
+  const obj={
+    codigo, nueva_persona: esNuevo?{nombre:fd.get("nuevo_nombre"),rut:fd.get("nuevo_rut"),fecha_nacimiento:fd.get("nuevo_fnac"),sexo_biologico:fd.get("nuevo_sexo"),prevision:fd.get("nuevo_prevision")}:null,
+    control:{fecha,tipo,canal,subjetivo:fd.get("subjetivo")||null,objetivo:fd.get("objetivo")||null,evaluacion:fd.get("evaluacion")||null,
+      acuerdos:lineas(fd.get("acuerdos")),recaidas:lineas(fd.get("recaidas")),facilitadores:lineas(fd.get("facilitadores")),
+      barreras_nuevas:lineas(fd.get("barreras_nuevas")),educacion:lineas(fd.get("educacion")),proxima_accion:fd.get("proxima_accion")||null,proximo_control:prox},
+    pilares, recetas, validacion:fd.get("validacion")||null
+  };
+  OUT.json=JSON.stringify(obj,null,2);
+
+  // ===== SQL =====
+  let sql=[];
+  sql.push(`-- VitalÆ · Atención ${fecha} · ${esNuevo?"NUEVA PERSONA: "+(fd.get("nuevo_nombre")||""):codigo}`);
+  sql.push("begin;");
+  if(esNuevo){
+    const codg="VIT-NUEVO";
+    sql.push(`-- NOTA: asigne un código VIT-00XX definitivo antes de ejecutar.`);
+    sql.push(`insert into pacientes (codigo,nombre,rut,fecha_nacimiento,sexo_biologico,prevision,tipo_consulta,fecha_ingreso,proximo_control,ultimo_registro,motivo_consulta,profesional,estado)`);
+    sql.push(`values ('${codg}',${q(fd.get("nuevo_nombre"))},${q(fd.get("nuevo_rut"))},${q(fd.get("nuevo_fnac"))},${q(fd.get("nuevo_sexo"))},${q(fd.get("nuevo_prevision"))},'medicina_cannabica',${q(fecha)},${q(prox)},${q(fecha)},${q(obj.control.evaluacion||obj.control.subjetivo)},'Dra. Valeria Alarcón Kunakov','activo');`);
+  }
+  const PID=esNuevo?`(select id from pacientes where codigo='VIT-NUEVO')`:`(select id from pacientes where codigo='${codigo}')`;
+  const c=obj.control;
+  sql.push(`insert into controles (paciente_id,fecha,tipo,canal,subjetivo,objetivo,evaluacion,acuerdos,recaidas,facilitadores,barreras_nuevas,educacion,proxima_accion,proximo_control,profesional)`);
+  sql.push(`values (${PID},${q(c.fecha)},${q(c.tipo)},${q(c.canal)},${q(c.subjetivo)},${q(c.objetivo)},${q(c.evaluacion)},${arr(c.acuerdos)},${arr(c.recaidas)},${arr(c.facilitadores)},${arr(c.barreras_nuevas)},${arr(c.educacion)},${q(c.proxima_accion)},${q(c.proximo_control)},'Dra. Valeria Alarcón Kunakov');`);
+  // actualizar próximo control + último registro (apaga la alerta de abandono)
+  if(!esNuevo){
+    sql.push(`update pacientes set proximo_control=${q(prox)}, ultimo_registro=${q(fecha)} where codigo='${codigo}';`);
+    if(obj.validacion) sql.push(`update pacientes set notas_calidad_dato = coalesce(notas_calidad_dato,'') || ' | Validación ${fecha}: ' || ${q(obj.validacion.replace(/\n/g,' '))} where codigo='${codigo}';`);
+  }
+  // pilares: nueva valoración conservando prioridad/riesgo/línea base previos
+  pilares.forEach(p=>{
+    const etapaSql = p.etapa ? q(p.etapa) : `(select etapa_cambio from pilares_eval e where e.paciente_id=pa.id and e.pilar='${p.pilar}' order by fecha desc limit 1)`;
+    sql.push(`insert into pilares_eval (paciente_id,pilar,fecha,motivacion,autoeficacia,etapa_cambio,observaciones,prioridad,nivel_riesgo,linea_base)`);
+    sql.push(`select pa.id,'${p.pilar}',${q(c.fecha)},${num(p.motivacion)},${num(p.autoeficacia)},${etapaSql},${q(p.obs)},`);
+    sql.push(`  (select prioridad from pilares_eval e where e.paciente_id=pa.id and e.pilar='${p.pilar}' order by fecha desc limit 1),`);
+    sql.push(`  (select nivel_riesgo from pilares_eval e where e.paciente_id=pa.id and e.pilar='${p.pilar}' order by fecha desc limit 1),`);
+    sql.push(`  (select linea_base from pilares_eval e where e.paciente_id=pa.id and e.pilar='${p.pilar}' order by fecha desc limit 1)`);
+    sql.push(`from pacientes pa where pa.codigo=${esNuevo?"'VIT-NUEVO'":`'${codigo}'`};`);
+  });
+  // recetas
+  recetas.forEach(r=>{
+    sql.push(`insert into recetas (paciente_id,fecha,tipo_formulacion,descripcion,ratio_thc_cbd,dosis_diaria,total_mensual,duracion_meses,total_receta,estado)`);
+    sql.push(`values (${PID},${q(c.fecha)},${q(r.tipo_formulacion)},${q(r.descripcion)},${q(r.ratio)},${q(r.dosis_diaria)},${q(r.total_mensual)},${num(r.duracion_meses)},${q(r.total_receta)},'vigente');`);
+  });
+  if(obj.validacion) sql.push(`-- Validación/corrección indicada: ${obj.validacion.replace(/\n/g," ")}`);
+  sql.push("commit;");
+  OUT.sql=sql.join("\n");
+
+  mostrar("sql");
+  $("#salida").style.display="block";
+  $("#salida").scrollIntoView({behavior:"smooth"});
+});
+function mostrar(t){$("#out").textContent=OUT[t];document.querySelectorAll(".ts").forEach(b=>b.classList.toggle("on",b.dataset.sal===t));}
+document.querySelectorAll(".ts").forEach(b=>b.addEventListener("click",()=>mostrar(b.dataset.sal)));
+window.copiar=()=>{navigator.clipboard.writeText($("#out").textContent).then(()=>toast("Copiado al portapapeles"),()=>toast("No se pudo copiar; seleccione y copie manualmente"));};
+window.descargar=()=>{const esSql=document.querySelector(".ts.on").dataset.sal==="sql";const cod=($("#sel-pac").value||"atencion").replace("__nuevo__","nuevo");const blob=new Blob([esSql?OUT.sql:OUT.json],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`vitalae-${cod}-${$("input[name=fecha]").value}.${esSql?"sql":"json"}`;a.click();toast("Descargado");};
+</script>
+</body>
+</html>
