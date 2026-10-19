@@ -250,7 +250,7 @@ label.campo{font-family:var(--util);font-size:11px;font-weight:800;letter-spacin
    MEV (9 pilares + Huella + Zonas Azules) + Medicina Cannábica
    Backend: Supabase (Auth + Postgres + RLS). Respaldo demo offline.
 ===================================================================== */
-const CONFIG = { SUPABASE_URL: "https://afvpxnxlothwecedkmdc.supabase.co/rest/v1/", SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdnB4bnhsb3Rod2VjZWRrbWRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MzA1MjksImV4cCI6MjEwODAwNjUyOX0.6C5H-7AcjJbnT0Cb1UY0IppePpIjm7QVWrhuTY0YVTA" };
+const CONFIG = { SUPABASE_URL: "https://afvpxnxlothwecedkmdc.supabase.co", SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdnB4bnhsb3Rod2VjZWRrbWRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MzA1MjksImV4cCI6MjEwODAwNjUyOX0.6C5H-7AcjJbnT0Cb1UY0IppePpIjm7QVWrhuTY0YVTA"};
 let db=null, SESION=null;
 const online = () => CONFIG.SUPABASE_URL.trim() && CONFIG.SUPABASE_ANON_KEY.trim();
 if (online() && window.supabase) db = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
