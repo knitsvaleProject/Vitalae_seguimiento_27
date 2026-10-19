@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalÆ · Cómo usar el formulario de atención</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#2D5F4F;--verde-osc:#1F4438;--verde-med:#3F7A66;--verde-suave:#E3EDE7;--verde-linea:#CBDCD3;
+  --crema:#F0F4EE;--blanco:#FDFEFC;--granate:#8B3A3A;--granate-suave:#F3E4E4;
+  --gold:#C4A878;--gold-osc:#A88B58;--gold-suave:#F4EDDF;--morado:#5B4B7A;
+  --ink:#1E2B26;--ink-2:#48584F;--ink-3:#77857D;
+  --serif:'DM Serif Display',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--util:'Manrope',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--crema);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold-suave)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes floatIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes ringPulse{0%{box-shadow:0 0 0 0 rgba(139,58,58,.45)}70%{box-shadow:0 0 0 14px rgba(139,58,58,0)}100%{box-shadow:0 0 0 0 rgba(139,58,58,0)}}
+@keyframes grow{from{height:0}to{height:var(--h)}}
+.reveal{opacity:0}
+.js .reveal.in{animation:fadeUp .6s cubic-bezier(.2,.7,.3,1) forwards}
+
+/* ---------- Hero ---------- */
+.hero{background:radial-gradient(1200px 400px at 80% -10%,rgba(196,168,120,.22),transparent 60%),linear-gradient(160deg,var(--verde-osc),#15302a);color:#EAF2EE;padding:54px 24px 60px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 20h40M20 0v40' stroke='%23ffffff08' stroke-width='1'/%3E%3C/svg%3E");opacity:.5;pointer-events:none}
+.hero-in{max-width:960px;margin:0 auto;position:relative}
+.marca{font-family:var(--serif);font-size:30px;letter-spacing:.03em}
+.marca em{color:var(--gold);font-style:italic}
+.kicker{font-family:var(--util);font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:#9DBBAD;margin:22px 0 10px}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.1;color:#fff;max-width:16ch}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero p.sub{font-size:16.5px;color:#C9DCD2;max-width:54ch;margin-top:16px}
+.hero .tag{display:inline-flex;align-items:center;gap:9px;margin-top:26px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);padding:9px 15px;border-radius:99px;font-family:var(--util);font-size:13px;color:#DCEAE3}
+.hero .tag code{font-family:'Consolas',monospace;color:var(--gold);font-size:12.5px}
+
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+.seccion{padding:52px 0 8px}
+.eyebrow{font-family:var(--util);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--verde-med);margin-bottom:8px}
+h2.t{font-family:var(--serif);font-weight:400;font-size:28px;color:var(--verde-osc);line-height:1.15}
+h2.t em{color:var(--gold-osc);font-style:italic}
+.lead{font-size:16px;color:var(--ink-2);max-width:62ch;margin-top:10px}
+
+/* ---------- Timeline de pasos ---------- */
+.pasos{margin-top:34px;position:relative}
+.linea{position:absolute;left:27px;top:14px;bottom:30px;width:3px;background:linear-gradient(var(--gold),var(--verde-linea));border-radius:3px}
+.js .linea{height:var(--h,0);animation:grow 1.1s ease forwards;--h:calc(100% - 44px)}
+.paso{display:grid;grid-template-columns:56px 1fr;gap:20px;margin-bottom:18px;position:relative}
+.nodo{width:56px;height:56px;border-radius:50%;background:var(--blanco);border:3px solid var(--verde-med);display:grid;place-items:center;color:var(--verde);z-index:2;box-shadow:0 4px 14px rgba(31,68,56,.1)}
+.nodo svg{width:24px;height:24px}
+.paso.destacado .nodo{border-color:var(--gold);background:var(--gold-suave);color:var(--gold-osc)}
+.pcard{background:var(--blanco);border:1px solid var(--verde-linea);border-radius:14px;padding:18px 22px;box-shadow:0 2px 10px rgba(31,68,56,.06);transition:transform .2s,box-shadow .2s}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(31,68,56,.13)}
+.pcard .pn{font-family:var(--util);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-osc)}
+.pcard h3{font-family:var(--serif);font-weight:400;font-size:21px;color:var(--verde-osc);margin:2px 0 6px}
+.pcard p{font-size:14.5px;color:var(--ink-2)}
+.pcard p b{color:var(--ink);font-weight:700}
+.pcard.oro{border-color:var(--gold);background:linear-gradient(150deg,var(--blanco),#FBF7EE)}
+.soap{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.soap span{font-family:var(--util);font-size:11px;font-weight:700;background:var(--verde-suave);color:var(--verde-osc);padding:4px 10px;border-radius:7px}
+
+/* ---------- Demo interactiva ---------- */
+.demo{margin-top:26px;background:var(--blanco);border:1px solid var(--verde-linea);border-radius:18px;padding:30px;box-shadow:0 10px 30px rgba(31,68,56,.1);text-align:center}
+.demo h3{font-family:var(--serif);font-weight:400;font-size:23px;color:var(--verde-osc)}
+.demo p.d{font-size:14.5px;color:var(--ink-2);max-width:48ch;margin:8px auto 22px}
+.pill{display:inline-flex;align-items:center;gap:12px;background:var(--crema);border:1px solid var(--verde-linea);border-radius:99px;padding:12px 20px;transition:.5s}
+.pill .dot{width:12px;height:12px;border-radius:50%;flex:none;transition:.5s}
+.pill .nom{font-family:var(--util);font-weight:700;font-size:14px;color:var(--ink)}
+.pill .est{font-family:var(--util);font-size:12.5px;font-weight:700;transition:.3s}
+.pill.alerta{border-color:var(--granate);background:var(--granate-suave)}
+.pill.alerta .dot{background:var(--granate);animation:ringPulse 1.8s infinite}
+.pill.alerta .est{color:var(--granate)}
+.pill.ok{border-color:var(--verde-med);background:var(--verde-suave)}
+.pill.ok .dot{background:#3E8E6D}
+.pill.ok .est{color:var(--verde-osc)}
+.demo .btn{margin-top:22px;font-family:var(--util);font-weight:700;font-size:14px;border:1.5px solid var(--verde);background:var(--verde);color:#fff;border-radius:11px;padding:11px 22px;cursor:pointer;transition:filter .15s,transform .1s}
+.demo .btn:hover{filter:brightness(1.08)}
+.demo .btn:active{transform:translateY(1px)}
+.demo .btn.reset{background:transparent;color:var(--verde);margin-left:8px}
+.demo .nota{font-size:12.5px;color:var(--ink-3);margin-top:16px}
+
+/* ---------- Tenga presente ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+.mini{background:var(--blanco);border:1px solid var(--verde-linea);border-left:4px solid var(--gold);border-radius:12px;padding:16px 18px}
+.mini h4{font-family:var(--util);font-size:13.5px;font-weight:800;color:var(--verde-osc);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.mini p{font-size:13.5px;color:var(--ink-2)}
+.mini .ic{width:18px;height:18px;color:var(--gold-osc);flex:none}
+
+.conf{margin-top:30px;background:var(--gold-suave);border:1px solid var(--gold);border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start}
+.conf svg{width:22px;height:22px;color:var(--granate);flex:none;margin-top:1px}
+.conf b{color:var(--granate)}
+.conf p{font-size:14px;color:var(--ink-2)}
+
+footer{text-align:center;font-family:var(--util);font-size:12px;color:var(--ink-3);padding:40px 24px 50px;line-height:1.7}
+footer .m{font-family:var(--serif);font-size:20px;color:var(--verde-osc)}
+footer .m em{color:var(--gold-osc);font-style:italic}
+
+@media(max-width:620px){
+  .grid{grid-template-columns:1fr}
+  .paso{grid-template-columns:46px 1fr;gap:14px}
+  .nodo{width:46px;height:46px}.nodo svg{width:20px;height:20px}
+  .linea{left:22px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <div class="marca">Vital<em>æ</em></div>
+    <div class="kicker">Guía para la Dra. Alarcón</div>
+    <h1>Cómo usar el <em>formulario</em> de atención</h1>
+    <p class="sub">Un formulario para registrar cada atención o control y cargarlo a la ficha del paciente. Sin instalar nada, sin depender de internet para llenarlo.</p>
+    <div class="tag">Se abre con doble clic · <code>vitalae-formulario-atencion.html</code></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="seccion">
+    <div class="eyebrow reveal">El flujo</div>
+    <h2 class="t reveal">Seis pasos, de <em>principio a fin</em></h2>
+    <p class="lead reveal">Cada atención sigue el mismo recorrido. Lo esencial está en los cuatro campos obligatorios; el resto se completa cuando corresponde.</p>
+
+    <div class="pasos" id="pasos">
+      <div class="linea"></div>
+
+      <div class="paso reveal">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.2-4 4.3-6 8-6s6.8 2 8 6"/></svg></div>
+        <div class="pcard"><div class="pn">Paso 1</div><h3>Elija el paciente</h3><p>En <b>«Persona atendida»</b> seleccione el nombre de la lista. Para un ingreso nuevo, elija <b>«➕ Nueva persona»</b> y complete sus datos.</p></div>
+      </div>
+
+      <div class="paso reveal">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10v18H7z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></div>
+        <div class="pcard"><div class="pn">Paso 2</div><h3>Registre la atención</h3><p>Fecha, tipo (control / ingreso / seguimiento) y canal. Luego la evolución clínica estructurada:</p><div class="soap"><span>S · lo que relata</span><span>O · hallazgos, EVA</span><span>A · su análisis</span></div></div>
+      </div>
+
+      <div class="paso reveal destacado">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 13l1.5 1.5L17 11" stroke-width="2.2"/></svg></div>
+        <div class="pcard oro"><div class="pn">Paso 3 · clave</div><h3>Complete el plan</h3><p>Escriba los acuerdos (uno por línea) y, muy importante, la fecha de <b>Próximo control</b>. Ese dato es el que <b>apaga la alerta de abandono</b> del paciente.</p></div>
+      </div>
+
+      <div class="paso reveal">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5M3 17l9 5 9-5"/></svg></div>
+        <div class="pcard"><div class="pn">Paso 4 · opcional</div><h3>Agregue lo que corresponda</h3><p>Despliegue las secciones para registrar <b>evolución por pilar</b> (motivación y autoeficacia 1–10), <b>recetas emitidas</b>, recaídas / facilitadores / barreras, y <b>validación o correcciones</b> de la ficha.</p></div>
+      </div>
+
+      <div class="paso reveal">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v4M12 17v4M5 12H3M21 12h-2M6 6l1.5 1.5M16.5 16.5L18 18M6 18l1.5-1.5M16.5 7.5L18 6"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+        <div class="pcard"><div class="pn">Paso 5</div><h3>Presione «Generar atención»</h3><p>El resultado aparece al final de la página, listo para entregar.</p></div>
+      </div>
+
+      <div class="paso reveal">
+        <div class="nodo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l16-7-7 16-2.5-6.5L4 12z"/></svg></div>
+        <div class="pcard"><div class="pn">Paso 6</div><h3>Entregue el resultado</h3><p>Use <b>«Descargar archivo»</b> o <b>«Copiar»</b> y envíe el <b>JSON</b> a Ismael. Si trabaja directo en la base, la pestaña <b>SQL</b> se pega en Supabase.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="eyebrow reveal">El dato que cambia todo</div>
+    <h2 class="t reveal">La alerta se <em>apaga sola</em></h2>
+    <p class="lead reveal">Cuando el control programado lleva más de 30 días vencido, el paciente aparece en rojo. Al registrar el seguimiento con una nueva fecha de control, la alerta se apaga. Pruébelo:</p>
+    <div class="demo reveal">
+      <h3>Juan P. · VIT-0010</h3>
+      <p class="d">Así se ve en el panel antes y después de registrar su control.</p>
+      <div class="pill alerta" id="pill">
+        <span class="dot"></span>
+        <span class="nom">Juan Pablo H.</span>
+        <span class="est" id="est">Riesgo de abandono · control vencido hace 82 días</span>
+      </div>
+      <div>
+        <button class="btn" id="btn" onclick="registrar()">Registrar seguimiento →</button>
+        <button class="btn reset" id="reset" onclick="resetDemo()" style="display:none">Volver a empezar</button>
+      </div>
+      <p class="nota" id="nota">Fije el «Próximo control» en el formulario y la alerta se resuelve automáticamente.</p>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="eyebrow reveal">Tenga presente</div>
+    <h2 class="t reveal">Cinco cosas <em>útiles</em></h2>
+    <div class="grid">
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Campos obligatorios</h4><p>Solo los marcados con <b>*</b>: paciente, fecha, tipo y próximo control. El resto, cuando aplique.</p></div>
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>La alerta de abandono</h4><p>Se enciende con el control vencido &gt;30 días y <b>se apaga</b> al registrar el seguimiento.</p></div>
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>Escala 1–10</h4><p>Motivación (M) y autoeficacia (A) van de 1 a 10. Si no evaluó un pilar, déjelo en blanco: conserva su valor anterior.</p></div>
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4h10M11 9h7M11 15h10M11 20h7"/><path d="M3 5l2 2 3-3M3 16l2 2 3-3"/></svg>Validación de datos</h4><p>Para corregir un RUT, ratio, duración o apellido, use la sección <b>«Validación / correcciones»</b>: queda registrado.</p></div>
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>Uno por paciente</h4><p>Puede llenar un formulario por cada persona atendida; cada uno genera su propio archivo.</p></div>
+      <div class="mini reveal"><h4><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Dos salidas</h4><p><b>JSON</b> para enviar a Ismael, o <b>SQL</b> para pegar directo en Supabase. Ambas cargan la atención a la ficha.</p></div>
+    </div>
+
+    <div class="conf reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+      <p><b>Confidencialidad.</b> El formulario y lo que genere contienen datos de pacientes: manéjelos de forma reservada y no los comparta por canales abiertos.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="m">Vital<em>æ</em></div>
+  Dra. Valeria Alarcón · Uso clínico interno<br>
+  Los puntajes del sistema son indicadores internos de seguimiento, no instrumentos validados.
+</footer>
+
+<script>
+  document.documentElement.classList.add("js");
+  // demo interactiva
+  function registrar(){
+    const pill=document.getElementById("pill"),est=document.getElementById("est"),btn=document.getElementById("btn"),reset=document.getElementById("reset"),nota=document.getElementById("nota");
+    pill.classList.remove("alerta");pill.classList.add("ok");
+    est.textContent="Al día · próximo control 30 ene 2027";
+    btn.style.display="none";reset.style.display="inline-block";
+    nota.textContent="¡Listo! El próximo control quedó agendado y la alerta desapareció del panel.";
+  }
+  function resetDemo(){
+    const pill=document.getElementById("pill"),est=document.getElementById("est"),btn=document.getElementById("btn"),reset=document.getElementById("reset"),nota=document.getElementById("nota");
+    pill.classList.remove("ok");pill.classList.add("alerta");
+    est.textContent="Riesgo de abandono · control vencido hace 82 días";
+    btn.style.display="inline-block";reset.style.display="none";
+    nota.textContent="Fije el «Próximo control» en el formulario y la alerta se resuelve automáticamente.";
+  }
+  // revelado al hacer scroll
+  if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}}),{threshold:.14});
+    document.querySelectorAll(".reveal").forEach((e,i)=>{e.style.animationDelay=(Math.min(i,5)*60)+"ms";io.observe(e);});
+  }else{document.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));}
+</script>
+</body>
+</html>
